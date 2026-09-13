@@ -68,10 +68,12 @@
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   @media (prefers-reduced-motion: no-preference) { .sw .box { transition: transform .12s; } .sw .box:not(.fixed):hover { transform: translateY(-2px); } }
   footer { margin-top: 36px; color: var(--ink-2); font-size: 13px; max-width: 70ch; }
+  footer .credit { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; }
+  footer a { color: var(--ink); }
 </style>
 
 <h1>Palette Completion Studio</h1>
-<p class="sub">Pick the colors you already have. The model proposes colors to add, running entirely in this page: a set transformer trained by flow matching on rated Adobe Kuler and Mechanical Turk palettes, reranked by a preference scorer fit to 528,106 human ratings.</p>
+<p class="sub">Pick the colors you already have. The model proposes colors to add, running entirely in this page: a set transformer trained by flow matching on rated Adobe Kuler palettes and Amazon Mechanical Turk-rated themes, reranked by a preference scorer trained on a subset of the O'Donovan 2014 dataset (528,106 ratings in total).</p>
 
 <div class="layout">
   <aside class="rail">
@@ -105,7 +107,8 @@
   </section>
 </div>
 
-<footer>Swatches are shown equal-area on a neutral ground, the same protocol the model's ratings came from. Each request draws 32 candidate completions, drops any that leave the sRGB gamut or duplicate a color, ranks the rest with the scorer, and returns a spread of the best. Palettes of up to five colors in total.</footer>
+<footer>Swatches are displayed at equal area on a neutral background. Each request draws 32 candidate completions, drops any that leave the sRGB gamut or duplicate a color, ranks the rest with the scorer, and returns a spread of the best. Palettes of up to five colors in total.
+<p class="credit">Model weights: <a href="http://creativecommons.org/licenses/by-nc-sa/2.5/ca/">CC BY-NC-SA 2.5 Canada</a>, noncommercial use only. Trained on data from Peter O'Donovan, Aseem Agarwala and Aaron Hertzmann, <a href="https://www.dgp.toronto.edu/~donovan/color/"><em>Color Compatibility From Large Datasets</em></a> (SIGGRAPH 2011; &copy; 2011 Peter O'Donovan) and <a href="https://www.dgp.toronto.edu/~donovan/cfcolor/"><em>Collaborative Filtering of Color Aesthetics</em></a> (CAe 2014). Model trained and exported by Cory Kiser. <a href="https://github.com/corykiser/colors/blob/main/LICENSE-WEIGHTS">Full licensing note</a>, including the unresolved scope of the 2014 data notice. Code: <a href="https://github.com/corykiser/colors">MIT</a>. Independent project; no affiliation with Adobe, COLOURlovers or Amazon is implied.</p></footer>
 
 <script src="app.js"></script>
 <script>

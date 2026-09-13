@@ -22,9 +22,20 @@ SOFTWARE.
 
 ---
 
-Scope. The MIT license above covers the source code in this repository
-(palette/, scripts/, tests/, configs/, web/*.js, web/*.html, docs/*.md,
-docs/demo/*.js, docs/demo/*.html).
+Scope. The MIT license above covers everything in this repository (source code,
+configuration, tests, documentation, reports, the blog post and the demo page markup
+and scripts) EXCEPT:
 
-It does NOT cover the trained model weights (web/model.json, docs/demo/model.json,
-and any file under experiments/) or the derived datasets. See LICENSE-WEIGHTS.
+  (a) trained model weights and derived data, listed in LICENSE-WEIGHTS
+      (web/model.json, docs/demo/model.json, everything under experiments/,
+      data/processed/ and data/splits/);
+  (b) data/manifest/license_evidence/, which holds excerpts of third-party license
+      notices retained as evidence; those texts stay under their original terms and
+      are not relicensed by this repository;
+  (c) the figures under docs/img/, whose provenance and terms are listed in
+      docs/img/README.md (grid_mabs.png reproduces palettes from the O'Donovan
+      datasets in its retrieval rows).
+
+Dependencies retain their own licenses (see uv.lock). Fonts used by the demo page
+(Bricolage Grotesque; IBM Plex Sans and IBM Plex Mono) are loaded from Google Fonts
+under the SIL Open Font License 1.1 and are not redistributed here.

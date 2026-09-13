@@ -32,7 +32,14 @@ def main(run, out):
     with torch.no_grad():
         y = model(x, f, msk, torch.tensor([500]), None)[0].numpy().tolist()
         s = scorer(x).item()
-    manifest = {"run": run, "checkpoint": ck.name, "model": cfg["model"], "diffusion": cfg["diffusion"], "space": cfg.get("data", {}).get("space", "oklab"),
+    manifest = {
+        "license": "CC BY-NC-SA 2.5 Canada", "license_url": "http://creativecommons.org/licenses/by-nc-sa/2.5/ca/",
+        "copyright": "Weights (c) 2026 Cory Kiser. Training data: Copyright (c) 2011 Peter O'Donovan (colorCode.zip).",
+        "attribution": ("Trained on datasets by Peter O'Donovan, Aseem Agarwala and Aaron Hertzmann: 'Color Compatibility From Large "
+                        "Datasets' (SIGGRAPH 2011, https://www.dgp.toronto.edu/~donovan/color/) and 'Collaborative Filtering of Color "
+                        "Aesthetics' (CAe 2014, https://www.dgp.toronto.edu/~donovan/cfcolor/). Noncommercial use only. "
+                        "Full notice: https://github.com/corykiser/colors/blob/main/LICENSE-WEIGHTS"),
+        "run": run, "checkpoint": ck.name, "model": cfg["model"], "diffusion": cfg["diffusion"], "space": cfg.get("data", {}).get("space", "oklab"),
                 "norm": norm.to_dict(), "scorer_variant": sc_ck["variant"], "tensors": tensors, "bytes": off, "weights_b64": weights_b64,
                 "reference": {"x": x[0].numpy().tolist(), "is_fixed": [True, True, False, False], "t": 500, "out": y, "score": s}}
     json.dump(manifest, open(out / "model.json", "w"))

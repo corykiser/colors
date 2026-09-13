@@ -59,7 +59,7 @@ Matched by source ID, and separately by exact 8-bit color multiset.
 
 Consequence: the "three sources" are one Kuler-derived pool plus COLOURlovers. Splits must be assigned on a unified key (site-prefixed ID ∪ color-multiset) so an MTurk-rated theme never lands in train via Kuler and in test via MTurk.
 
-## 4. License evidence (copies in `license_evidence/`)
+## 4. License evidence (excerpts in `license_evidence/`; full page captures retained privately)
 
 | Source | Evidence | Reading | Commercial reuse |
 | --- | --- | --- | --- |

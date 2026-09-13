@@ -1,29 +1,76 @@
 Trained model weights and derived data
-=====================================
+======================================
 
-Files: web/model.json, docs/demo/model.json, experiments/**/*.pt, data/processed/**, data/splits/**
+Files: web/model.json, docs/demo/model.json, and everything under experiments/,
+data/processed/ and data/splits/ (the latter three are git-ignored and not published).
 
-These were trained on, or derived from, the datasets released with
+Training sources
+----------------
+
+The generator and the preference scorer in this repository were trained on data from
 
   Peter O'Donovan, Aseem Agarwala, Aaron Hertzmann.
   "Color Compatibility From Large Datasets." ACM Transactions on Graphics 30(4), SIGGRAPH 2011.
-  https://www.dgp.toronto.edu/~donovan/color/
+  Release: colorCode.zip, https://www.dgp.toronto.edu/~donovan/color/
+  Copyright notice as it appears in the archive (README.txt):
+    "Copyright (c) 2011 Peter O'Donovan
+     Distributed under the Creative Commons BY-NC-SA license.
+     http://creativecommons.org/licenses/by-nc-sa/2.5/ca/"
 
   Peter O'Donovan, Aseem Agarwala, Aaron Hertzmann.
   "Collaborative Filtering of Color Aesthetics." Computational Aesthetics (CAe) 2014.
-  https://www.dgp.toronto.edu/~donovan/cfcolor/
+  Release: cfcolor.zip, https://www.dgp.toronto.edu/~donovan/cfcolor/
+  Notice as it appears in the archive (runPrediction.m header) and on the project page:
+    "Permission is granted for anyone to copy, use, modify, or distribute this program and
+     accompanying programs and documents for any purpose, provided this copyright notice is
+     retained and prominently displayed, along with a note saying that the original programs
+     are available from our web page. The programs and documents are distributed without any
+     warranty, express or implied."
+  The original programs are available from https://www.dgp.toronto.edu/~donovan/cfcolor/.
 
-which the authors distribute under the Creative Commons Attribution-NonCommercial-ShareAlike 2.5 Canada
-license (http://creativecommons.org/licenses/by-nc-sa/2.5/ca/).
+The authors ask that publications using this data cite the papers above.
 
-Accordingly, the weights and derived data in this repository are released under
-CC BY-NC-SA 2.5 Canada. You may use, share and adapt them for noncommercial purposes,
-with attribution to the original authors above and to this repository, and any
-adaptation must carry the same license. Commercial use is not permitted.
+What license applies
+--------------------
 
-The raw datasets themselves are not redistributed here; download them from the project pages above.
-Verified counts, checksums and the license notices as they appeared are recorded in data/manifest/.
+The 2011 release expressly uses CC BY-NC-SA 2.5 Canada. The license applicable to the 2014
+theme and individual-rating data is unresolved: the archive carries only the permissive notice
+quoted above, whose scope ("programs and documents") may or may not include the data files,
+and the project page's CC BY-NC-SA sentence is inside an HTML comment attached to a withdrawn
+download. Most 2014 themes (10,672 of 13,343) are also in the 2011 release and are covered by
+its CC terms; the remaining themes and the individual ratings rest on the permissive notice.
+This repository treats all of the 2014 data as if CC BY-NC-SA 2.5 Canada applied, as the more
+restrictive reading. Written clarification has been requested from the authors.
 
-The Sanzo Wada palettes (data/processed/wada.parquet, if built) come from Matt DesLauriers' MIT-licensed
-transcription (https://github.com/mattdesl/dictionary-of-colour-combinations); the U.S. copyright status of
-the underlying 1933-34 work is unresolved and they are not included in the trained weights.
+Whether trained weights are a "Derivative Work" of a dataset under CC 2.5 Canada (section 1:
+a work that "produces or reproduces the Work or any substantial part thereof in any material
+form") is unsettled; float16 network weights do not reproduce any dataset row. To respect the
+noncommercial condition on the training data regardless, Cory Kiser offers whatever rights he
+holds in the trained weights under
+
+  Creative Commons Attribution-NonCommercial-ShareAlike 2.5 Canada
+  http://creativecommons.org/licenses/by-nc-sa/2.5/ca/
+
+as a licensing choice, not as confirmation of an upstream obligation. The derived parquet and
+split files under data/processed/ and data/splits/ reproduce dataset rows (colors, names, IDs,
+ratings) and are Derivative Works of the 2011 release; they carry CC BY-NC-SA 2.5 Canada and
+are not published.
+
+Terms in brief: use, share and adapt for noncommercial purposes, with attribution (author,
+title, source URI, this notice) and a copy of or link to the license with every copy. Where
+share-alike applies, adaptations must use a license permitted by section 4(b) of CC BY-NC-SA
+2.5 Canada: that license, a later version with the same license elements, or an eligible
+jurisdiction port. This license does not authorize commercial exercise of the licensed rights;
+separate permission may be available from the rightsholders.
+
+Not included
+------------
+
+The raw datasets are not redistributed here. The COLOURlovers and MTurk-2011 families were
+ingested for the data audit but are not used by any published model. The Sanzo Wada palettes
+(Matt DesLauriers' MIT-licensed transcription, https://github.com/mattdesl/dictionary-of-colour-combinations;
+the underlying 1933-34 work's U.S. status is unresolved) were ingested for the audit only and
+are not in any published artifact or in the trained weights.
+
+Independent research project; no affiliation with or endorsement by Adobe, COLOURlovers,
+Amazon or the University of Toronto is implied.

@@ -26,7 +26,7 @@ Kuler and COLOURlovers numeric IDs collide. 15,504 IDs match across the two, and
 
 The Palette-and-Text dataset's official download is a dead Google Drive link. Copies exist in unrelated student repositories with no license. I did not use them.
 
-Every source is under `data/manifest/AUDIT.md` with checksums and the license text as it appeared. The O'Donovan data is CC BY-NC-SA 2.5 Canada. Anything trained on it inherits that, including the weights in the demo.
+Every source is under `data/manifest/AUDIT.md` with checksums and the license text as it appeared. The 2011 release is CC BY-NC-SA 2.5 Canada (copyright 2011 Peter O'Donovan); the 2014 archive carries only a permissive notice for "programs and documents", and whether that covers the data files is unresolved. The demo's weights are offered under CC BY-NC-SA 2.5 Canada as a conservative choice, with the reasoning in `LICENSE-WEIGHTS`.
 
 ## Splits are where evaluations die
 
@@ -71,6 +71,8 @@ With the same rating filter and the same pipeline, retrieval moves from -0.12 to
 
 ![Absolute-only model against the baselines on the probe contexts](img/grid_mabs.png)
 
+*The retrieval rows are real palettes from the O'Donovan 2011/2014 datasets (CC BY-NC-SA 2.5 Canada); the other rows are model or formula outputs.*
+
 ## Flow matching, and why the demo is fast
 
 The spec called for variance-preserving diffusion with 100 DDIM steps. A step sweep showed 20 steps matches 100 on every metric at a fifth of the latency. Then I trained the same network with a flow-matching objective (predict velocity, straight interpolation) and sampled with plain Euler. Ten steps gives whole-completion gamut validity of 93 to 97%, against 84% for the best VP setting, at 14 milliseconds per call on the GPU. The browser demo runs that model in JavaScript at about a second per request for 32 candidates, most of it the forward pass in a 128-dimensional transformer written as nested loops. Training in gamma sRGB instead of Oklab, which I had guessed would help with the gamut, did nothing.
@@ -95,4 +97,6 @@ uv run python scripts/train.py configs/flow_subset.yaml --out experiments/v2/flo
 uv run python scripts/sample.py --model experiments/v2/flow_subset/model_best.pt --colors "#9caf88,#6b4a2b" --m 2
 ```
 
-The data has to be downloaded from the original project pages; the manifest has the URLs and checksums. Gate reports G2 through G5 and the external review are under `reports/`.
+The data has to be downloaded from the original project pages; the manifest has the URLs and checksums. Gate reports G2 through G5 and the change log from the external review (`reports/G5_review_changes.md`) are under `reports/`.
+
+*Training data: Peter O'Donovan, Aseem Agarwala and Aaron Hertzmann, [Color Compatibility From Large Datasets](https://www.dgp.toronto.edu/~donovan/color/) (SIGGRAPH 2011, copyright 2011 Peter O'Donovan, CC BY-NC-SA 2.5 Canada) and [Collaborative Filtering of Color Aesthetics](https://www.dgp.toronto.edu/~donovan/cfcolor/) (CAe 2014). Weights: [CC BY-NC-SA 2.5 Canada](http://creativecommons.org/licenses/by-nc-sa/2.5/ca/), noncommercial. Code: MIT.*

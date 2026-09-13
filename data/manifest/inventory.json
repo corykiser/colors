@@ -35,7 +35,7 @@
       "archive": "data/raw/cfcolor.zip",
       "sha256": "47c07095642cfab3c2eeab366a5d152b07783cbb5af390cbfda7d7c13db4b54c",
       "bytes": 53745893,
-      "license": "Permissive program notice on page and in runPrediction.m; data assumed CC BY-NC-SA 2.5 CA (same MTurk study as S2). See AUDIT.md.",
+      "license": "Permissive program notice on page and in runPrediction.m; applicability to the data files unresolved; treated as CC BY-NC-SA 2.5 CA (most restrictive reading). See AUDIT.md and LICENSE-WEIGHTS.",
       "files": {
         "allMTurkRatings.mat": {
           "sha256": "5d8488c4370ec7531692335c6ace58b945621612decd0bb11c6926f0578ed73a",

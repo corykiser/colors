@@ -48,4 +48,4 @@ experiments/      run outputs (git-ignored)
 
 ## License
 
-Code: MIT (`LICENSE`). Trained weights and derived data: CC BY-NC-SA 2.5 Canada, inherited from the O'Donovan 2011/2014 releases (`LICENSE-WEIGHTS`). Write-up and live demo: https://corykiser.github.io/colors/
+Code: MIT (`LICENSE`). Trained weights and derived data: offered under CC BY-NC-SA 2.5 Canada (`LICENSE-WEIGHTS`) because they were trained on the O'Donovan 2011 release (CC BY-NC-SA 2.5 CA, copyright (c) 2011 Peter O'Donovan) and 2014 release, whose data license is unresolved. Attribution: Peter O'Donovan, Aseem Agarwala and Aaron Hertzmann, [Color Compatibility From Large Datasets](https://www.dgp.toronto.edu/~donovan/color/) (SIGGRAPH 2011) and [Collaborative Filtering of Color Aesthetics](https://www.dgp.toronto.edu/~donovan/cfcolor/) (CAe 2014). Write-up and live demo: https://corykiser.github.io/colors/

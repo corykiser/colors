@@ -1,0 +1,8 @@
+Source: https://www.dgp.toronto.edu/~donovan/color/  (retrieved 2026-09-13)
+SHA-256 of the full page as retrieved: abfeb28684146bafff588d4282c684de55ce977651c6f9201c7c348b5ea90af5
+Full capture retained privately; only the license-relevant excerpt is reproduced here.
+
+Excerpt (visible page text):
+  "Datasets and Code for Training/Testing a Compatibility Model: colorCode.zip Data and code are released under the Creative Commons BY-NC-SA license. If you use this data or code for a publication, we ask that you cite the above paper."
+
+The "Creative Commons BY-NC-SA license" text links to http://creativecommons.org/licenses/by-nc-sa/2.5/ca/
