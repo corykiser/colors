@@ -1,0 +1,16 @@
+## Findings by review item
+
+1. **Bugs.** All five fixed with tests: fixed–fixed pairs no longer trigger duplicate rejection (`#808080` + `#818181` now completes); repulsion also separates targets from context; subset-derived examples get the null rating token; eligible (post-filter) counts are logged (30,687, not 45,924); best checkpoints are saved and used for evaluation.
+2. **Fair retrieval.** With the same rating filter and the same rerank/diversity pipeline, retrieval reaches scorer 0.00 vs raw retrieval −0.12: most of the earlier "neural gain" was postprocessing. Through the *same* pipeline the diffusion models still win on the scorer (M-abs 0.06, M-abs+subset 0.07) and match retrieval on reconstruction, but retrieval keeps higher diversity (0.25 vs 0.22). The generator's honest advantage is quality at equal duplicate rate, not variety.
+3. **Dedup recall.** The per-channel-sorted embedding has a provable recall bound (‖F_A−F_B‖ ≤ n·d); it found 483 near pairs the sort-by-L heuristic missed. Exact cross-split audit: 0 near pairs in any split pair. The 11k-row chain is forced into train.
+4. **Rater separation.** 114 users removed from all training signal; 781 palettes changed filter status. Reliability ceilings: repeat-judgment r = 0.72, split-half Spearman–Brown = 0.71, so the ordinal scorer's 0.75 vs seen-user means is at the ceiling. Held-out-user agreement is 0.29 because those users give a median of 4 ratings per palette; the scorer reaches 0.25 of it. A larger held-out rater pool, not a better model, is what would raise that number.
+5. **Balanced human pilot.** Probe set rebuilt to 26 conditional contexts balanced by fixed-color count (6/10/8/2 for n = 1–4); the study package has 318 blinded items over 6 methods including "complete to five then subset"; the power model now includes item variance (with default guesses, N ≈ 117 raters, and the item-variance floor shows that adding contexts matters more than adding raters). Not run.
+6. **Scorer.** Ordinal cumulative-link with per-rater shift and scale beats MSE on means (0.751 vs 0.733 Spearman, 3 seeds each) and is deployed. Within-user pairwise training is worse (0.68); the ordered-features scorer still does not beat DeepSets (R3 stands).
+7. **Step sweep (VP, DDIM).** 20 steps = 100 steps on every metric at 0.055 s/call vs 0.27. DPM-Solver++ 2M as implemented is worse than DDIM at every step count; not diagnosed further because item 8 makes it moot.
+8. **Flow matching vs VP; sRGB vs Oklab.** Flow matching (same network, velocity target) with 5–10 Euler steps: 0.010–0.014 s/call, whole-completion gamut validity 93–97% (VP best: 84%), scorer at or above VP; diversity is lower at 5 steps (0.19) and recovers by 20 (0.22). Through the pipeline flow scores 0.04 with diversity 0.23. **Recommendation: switch the deployed generator to flow matching with 10 Euler steps** and retrain the subset variant on it. Training in gamma sRGB gives no gamut benefit (87% vs 84–87% whole-completion at 20 steps) and a worse scorer; Oklab stays.
+
+## Caveats
+
+- v2 numbers are on rebuilt splits and a new scorer scale; do not compare to G2–G4 tables.
+- Single seed per v2 run.
+- The DPM-Solver++ implementation is verified only against an oracle denoiser; its gap to DDIM on the real model is unexplained.

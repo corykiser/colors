@@ -10,6 +10,10 @@
 | 5 Sampling pipeline | G5 | **done** | `palette/api.py`: rejection → repulsion → chroma-reduction fallback, scorer rerank, greedy diverse top-k; `scripts/sample.py` CLI |
 | 6 Human-eval prep | — | **done** (no collection) | `scripts/make_study_package.py`, `reports/pilot_protocol.md`, `scripts/power_stub.py` |
 
+## Post-review changes (reports/G5_review_changes.md)
+
+External review (`reports/external_review_codex.md`) items 1–8 implemented: bug fixes, exact-recall dedup and re-split, rater separation, fair pipelined retrieval, ordinal scorer, balanced study package, step sweep, flow-matching and sRGB ablations. Result: through a matched pipeline the generator beats retrieval on quality but not diversity; flow matching at 10 Euler steps is the recommended sampler (97% whole-completion gamut validity, 14 ms/call). Reference runs are now under `experiments/v2/`.
+
 ## G1 notes
 
 - Dedup: exact (Oklab quantized 1e-3, permutation-invariant) + near (min-cost mean Oklab distance < 0.02, KD-tree blocking on sort-by-L). 26,094 exact-duplicate rows; 166,717 near pairs. Group `dg:5` (11,096 rows, mean L 0.84, 47% of colors with chroma < 0.03) is a transitive chain through the dense pale/neutral region. It is assigned to one split as a whole. Revisit with a stricter threshold or complete-linkage if it skews split composition.
