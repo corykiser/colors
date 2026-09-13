@@ -1,0 +1,11 @@
+# raw source archives: CC BY-NC-SA / third-party data, never committed
+data/raw/
+data/processed/
+data/splits/
+experiments/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+*.egg-info/

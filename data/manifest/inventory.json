@@ -1,0 +1,69 @@
+{
+  "generated": "2026-09-13T09:43:17",
+  "sources": {
+    "S2_odonovan2011": {
+      "url": "https://www.dgp.toronto.edu/~donovan/color/colorCode.zip",
+      "archive": "data/raw/colorCode.zip",
+      "sha256": "b0364bebafda06c96f5a084da69993d5b2913c72f9291b17ec3a909a91797fda",
+      "bytes": 22548099,
+      "license": "CC BY-NC-SA 2.5 Canada (README.txt inside archive + project page)",
+      "files": {
+        "mturkData.mat": {
+          "sha256": "407bdd01db507602a77b7d92a0ab45694fe4a8a732cae406135a3d6940709827",
+          "bytes": 645549
+        },
+        "kulerData.mat": {
+          "sha256": "671699ce294ebec451bd067aebdd7f5a917c95f6c90c62102dbbcc607a485188",
+          "bytes": 2225972
+        },
+        "colorLoversData.mat": {
+          "sha256": "f2112ec9697910619acc57912f7513fb54e6b8464e84def9036b9870bf0eecf2",
+          "bytes": 13806237
+        },
+        "kulerX.mat": {
+          "sha256": "6d8b920e6e00ea37132c8a8e0fc4f0ebfa5c6d0002f221bebb53cb49a38463e4",
+          "bytes": 2946
+        },
+        "hueProbsRGB.mat": {
+          "sha256": "97183601d379e6f5a865b21f91fec65489c15b19507ef219873edf8a5f4b1bd6",
+          "bytes": 5172917
+        }
+      }
+    },
+    "S1_odonovan2014": {
+      "url": "https://www.dgp.toronto.edu/~donovan/cfcolor/cfcolor.zip",
+      "archive": "data/raw/cfcolor.zip",
+      "sha256": "47c07095642cfab3c2eeab366a5d152b07783cbb5af390cbfda7d7c13db4b54c",
+      "bytes": 53745893,
+      "license": "Permissive program notice on page and in runPrediction.m; data assumed CC BY-NC-SA 2.5 CA (same MTurk study as S2). See AUDIT.md.",
+      "files": {
+        "allMTurkRatings.mat": {
+          "sha256": "5d8488c4370ec7531692335c6ace58b945621612decd0bb11c6926f0578ed73a",
+          "bytes": 3929214
+        },
+        "themeData.mat": {
+          "sha256": "b15c903bde8a21c44fb81eb1afacad901568d9740f3abf98fb5bc4eb0755a4c7",
+          "bytes": 49907723
+        }
+      }
+    },
+    "S6_wada_deslauriers": {
+      "url": "https://github.com/mattdesl/dictionary-of-colour-combinations",
+      "git_commit": "c142bd0bc8049ea48db4da5eb397981f047e8ef4",
+      "license": "MIT (transcription/conversion); underlying Wada work: Japan PD, U.S. status unresolved",
+      "files": {
+        "colors.json": {
+          "sha256": "555f11c32eb8133078fd470dd7d5320533aaa8b636f12fa06a8dd3d0ee2703b4",
+          "bytes": 60245
+        }
+      }
+    },
+    "S3_pat_text2colors": {
+      "url": "https://github.com/awesome-davian/Text2Colors",
+      "git_commit": "41283a3ded19f0d95b662e264715678d49dcd63f",
+      "license": "MIT (code only); dataset terms: none stated beyond \"please cite\"",
+      "dataset_status": "NOT ACQUIRED: Google Drive id 1CtYnsTASXFZZ4RCJXZaxEWvybz_4AMa4 returns 404",
+      "files": {}
+    }
+  }
+}
