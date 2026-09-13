@@ -22,11 +22,27 @@
   .rail { background: var(--panel); border: 1px solid var(--line); padding: 18px; display: grid; gap: 18px; }
   .label { font: 500 11px/1 "IBM Plex Sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 8px; }
   .ctx { display: grid; gap: 8px; }
-  .ctx-row { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; }
-  .ctx-row input[type=color] { width: 44px; height: 36px; border: 1px solid var(--line-2); background: none; padding: 2px; cursor: pointer; }
-  .ctx-row input[type=text] { font: 14px "IBM Plex Mono", monospace; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 7px 9px; width: 100%; }
-  .x { background: none; border: 1px solid transparent; color: var(--ink-2); cursor: pointer; font-size: 18px; line-height: 1; padding: 6px 8px; }
-  .x:hover { color: var(--ink); border-color: var(--line-2); }
+  .hint { font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
+  .ctx-item { border: 1px solid var(--line-2); background: var(--bg); }
+  .ctx-item.open { border-color: var(--ink-2); }
+  .cbtn { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 12px; width: 100%; padding: 6px; background: none; border: 0; color: var(--ink); cursor: pointer; text-align: left; font: inherit; }
+  .cbtn .chipsw { height: 44px; border: 1px solid var(--swatch-edge); }
+  .cbtn .hexlbl { font: 14px "IBM Plex Mono", monospace; }
+  .cbtn .edit { font: 500 11px "IBM Plex Sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); padding-right: 6px; }
+  .editor { display: grid; gap: 12px; padding: 10px 10px 12px; border-top: 1px solid var(--line); }
+  .slider { display: grid; grid-template-columns: 74px 1fr 52px; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); }
+  .slider .val { font: 12px "IBM Plex Mono", monospace; text-align: right; color: var(--ink); }
+  .track { position: relative; height: 34px; }
+  .track canvas { position: absolute; inset: 6px 0; width: 100%; height: 22px; border: 1px solid var(--swatch-edge); }
+  .track input[type=range] { position: absolute; inset: 0; width: 100%; height: 34px; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; }
+  .track input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 34px; border-radius: 4px; background: var(--panel); border: 2px solid var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .track input[type=range]::-moz-range-thumb { width: 22px; height: 34px; border-radius: 4px; background: var(--panel); border: 2px solid var(--ink); }
+  .track input[type=range]::-webkit-slider-runnable-track { background: transparent; height: 34px; }
+  .track input[type=range]::-moz-range-track { background: transparent; height: 34px; }
+  .editor .foot { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
+  .editor input[type=text] { font: 14px "IBM Plex Mono", monospace; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); padding: 8px 9px; width: 100%; min-width: 0; }
+  .x { background: none; border: 1px solid var(--line-2); color: var(--ink-2); cursor: pointer; font: 500 13px "IBM Plex Sans", sans-serif; padding: 7px 10px; }
+  .x:hover { color: var(--ink); border-color: var(--ink-2); }
   .row { display: flex; gap: 8px; flex-wrap: wrap; }
   .chip, .btn { font: 500 13px "IBM Plex Sans", sans-serif; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 7px 11px; cursor: pointer; }
   .chip:hover, .btn:hover { border-color: var(--ink-2); }
@@ -45,7 +61,8 @@
   .sw { width: 76px; display: grid; gap: 5px; }
   .sw .box { height: 76px; border: 1px solid var(--swatch-edge); cursor: pointer; position: relative; }
   .sw.fixed .box { outline: 2px solid var(--fixed-ring); outline-offset: -4px; cursor: default; }
-  .sw .box:not(.fixed):hover::after { content: "lock"; position: absolute; inset: auto 0 0 0; text-align: center; font: 500 10px/1.6 "IBM Plex Sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; background: var(--panel); color: var(--ink); }
+  .sw .box:not(.fixed)::after { content: "tap to keep"; position: absolute; inset: auto 0 0 0; text-align: center; font: 500 9px/1.7 "IBM Plex Sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; background: color-mix(in srgb, var(--panel) 85%, transparent); color: var(--ink); opacity: .85; }
+  @media (hover: hover) { .sw .box:not(.fixed)::after { opacity: 0; } .sw .box:not(.fixed):hover::after { opacity: 1; } }
   .sw .hex { font: 12px "IBM Plex Mono", monospace; color: var(--ink-2); }
   .sw.fixed .hex { color: var(--ink); }
   .meta { font: 12px "IBM Plex Mono", monospace; color: var(--ink-2); }
@@ -62,6 +79,7 @@
   <aside class="rail">
     <div>
       <p class="label">Your colors</p>
+      <p class="hint">Tap a color to change it with the lightness, chroma and hue sliders, or type a hex code.</p>
       <div class="ctx" id="ctx"></div>
       <div class="row" style="margin-top:8px">
         <button class="btn" id="add" type="button">Add color</button>
@@ -84,7 +102,7 @@
 
   <section>
     <p class="label">Proposals</p>
-    <div class="results" id="results"><p class="empty">Your fixed colors come back unchanged and outlined. Click any proposed swatch to lock it in and ask for more.</p></div>
+    <div class="results" id="results"><p class="empty">Your fixed colors come back unchanged and outlined. Tap any proposed swatch to keep it and ask for more.</p></div>
     <p class="meta" id="meta"></p>
   </section>
 </div>
@@ -98,27 +116,58 @@
   const PRESETS = [["sage + brown", ["#9caf88", "#6b4a2b"]], ["navy", ["#1f2a44"]], ["teal + coral", ["#1b9aaa", "#ef767a"]], ["black + white", ["#000000", "#ffffff"]], ["mustard", ["#d4a017"]], ["burgundy + cream + olive", ["#6d1a36", "#f3e9d2", "#6b7a3a"]]];
   let ctx = ["#9caf88", "#6b4a2b"], ready = false;
 
+  // OkLCh editor. Sliders: lightness 0–1, chroma 0–0.37, hue 0–360. Out-of-gamut choices are chroma-reduced at fixed L,h.
+  const toLch = lab => [lab[0], Math.hypot(lab[1], lab[2]), (Math.atan2(lab[2], lab[1]) * 180 / Math.PI + 360) % 360];
+  const fromLch = ([L, C, h]) => [L, C * Math.cos(h * Math.PI / 180), C * Math.sin(h * Math.PI / 180)];
+  const lchToHex = lch => P.oklabToHex(P.gamutMap(fromLch(lch)));
+  let openIdx = -1; const lchState = {};
+  function paintTrack(canvas, fn) { const ctx2 = canvas.getContext("2d"), n = canvas.width; for (let i = 0; i < n; i++) { const rgb = P.oklabToSrgb(P.gamutMap(fn(i / (n - 1)))); ctx2.fillStyle = `rgb(${rgb.map(v => Math.round(Math.min(1, Math.max(0, v)) * 255)).join(",")})`; ctx2.fillRect(i, 0, 1, canvas.height); } }
   function renderCtx() {
     const el = $("ctx"); el.innerHTML = "";
     ctx.forEach((h, i) => {
-      const row = document.createElement("div"); row.className = "ctx-row";
-      const c = document.createElement("input"); c.type = "color"; c.value = h; c.id = "c" + i; c.setAttribute("aria-label", "color " + (i + 1));
-      const t = document.createElement("input"); t.type = "text"; t.value = h; t.id = "t" + i; t.maxLength = 7; t.setAttribute("aria-label", "hex " + (i + 1));
-      const x = document.createElement("button"); x.className = "x"; x.type = "button"; x.textContent = "×"; x.title = "Remove";
-      c.addEventListener("input", () => { ctx[i] = c.value; t.value = c.value; });
-      t.addEventListener("change", () => { const v = t.value.trim().toLowerCase(); if (/^#?[0-9a-f]{6}$/.test(v)) { ctx[i] = v.startsWith("#") ? v : "#" + v; renderCtx(); } else t.value = ctx[i]; });
-      x.addEventListener("click", () => { ctx.splice(i, 1); renderCtx(); });
-      row.append(c, t, x); el.append(row);
+      const item = document.createElement("div"); item.className = "ctx-item" + (openIdx === i ? " open" : "");
+      const btn = document.createElement("button"); btn.type = "button"; btn.className = "cbtn"; btn.id = "cbtn" + i; btn.setAttribute("aria-expanded", openIdx === i);
+      btn.innerHTML = `<span class="chipsw" style="background:${h}"></span><span class="hexlbl">${h}</span><span class="edit">${openIdx === i ? "close" : "edit"}</span>`;
+      btn.addEventListener("click", () => { openIdx = openIdx === i ? -1 : i; renderCtx(); });
+      item.append(btn);
+      if (openIdx === i) {
+        if (!lchState[i] || lchState[i].hex !== h) lchState[i] = { hex: h, lch: toLch(P.hexToOklab(h)) };
+        const st = lchState[i]; const ed = document.createElement("div"); ed.className = "editor";
+        const specs = [["Lightness", 0, 1, 0.005, 0, v => v.toFixed(2), x => [x, st.lch[1], st.lch[2]]],
+                       ["Chroma", 0, 0.37, 0.002, 1, v => v.toFixed(3), x => [st.lch[0], x * 0.37, st.lch[2]]],
+                       ["Hue", 0, 360, 1, 2, v => Math.round(v) + "°", x => [st.lch[0], st.lch[1], x * 360]]];
+        const canvases = [];
+        const repaint = () => { canvases.forEach((c, j) => paintTrack(c, specs[j][6])); ed.querySelectorAll(".val").forEach((v, j) => v.textContent = specs[j][5](st.lch[specs[j][4]])); };
+        const commit = () => { const hx = lchToHex(st.lch); ctx[i] = hx; st.hex = hx; btn.querySelector(".chipsw").style.background = hx; btn.querySelector(".hexlbl").textContent = hx; hexIn.value = hx; repaint(); };
+        specs.forEach(([name, min, max, step, idx, fmt], j) => {
+          const row = document.createElement("div"); row.className = "slider";
+          const lab = document.createElement("span"); lab.textContent = name;
+          const tr = document.createElement("div"); tr.className = "track";
+          const cv = document.createElement("canvas"); cv.width = 128; cv.height = 1; canvases.push(cv);
+          const rg = document.createElement("input"); rg.type = "range"; rg.min = min; rg.max = max; rg.step = step; rg.value = st.lch[idx]; rg.id = `sl${i}_${j}`; rg.setAttribute("aria-label", name);
+          rg.addEventListener("input", () => { st.lch[idx] = +rg.value; commit(); });
+          rg.addEventListener("change", () => { if (ready) run(); });
+          const val = document.createElement("span"); val.className = "val"; val.textContent = fmt(st.lch[idx]);
+          tr.append(cv, rg); row.append(lab, tr, val); ed.append(row);
+        });
+        const foot = document.createElement("div"); foot.className = "foot";
+        const hexIn = document.createElement("input"); hexIn.type = "text"; hexIn.value = h; hexIn.id = "hex" + i; hexIn.maxLength = 7; hexIn.setAttribute("aria-label", "hex code"); hexIn.autocomplete = "off"; hexIn.spellcheck = false;
+        hexIn.addEventListener("change", () => { const v = hexIn.value.trim().toLowerCase(); if (/^#?[0-9a-f]{6}$/.test(v)) { ctx[i] = v.startsWith("#") ? v : "#" + v; delete lchState[i]; renderCtx(); if (ready) run(); } else hexIn.value = ctx[i]; });
+        const rm = document.createElement("button"); rm.type = "button"; rm.className = "x"; rm.textContent = "Remove"; rm.addEventListener("click", () => { ctx.splice(i, 1); openIdx = -1; delete lchState[i]; renderCtx(); });
+        const done = document.createElement("button"); done.type = "button"; done.className = "x"; done.textContent = "Done"; done.addEventListener("click", () => { openIdx = -1; renderCtx(); });
+        foot.append(hexIn, rm, done); ed.append(foot); item.append(ed); repaint();
+      }
+      el.append(item);
     });
     const mSel = $("m"); [...mSel.options].forEach(o => { o.disabled = ctx.length + +o.value > 5; });
     if (mSel.selectedOptions[0].disabled) mSel.value = String(Math.max(1, 5 - ctx.length));
     $("add").disabled = ctx.length >= 4;
   }
-  $("add").addEventListener("click", () => { ctx.push("#808080"); renderCtx(); });
-  $("clear").addEventListener("click", () => { ctx = []; renderCtx(); });
+  $("add").addEventListener("click", () => { ctx.push("#808080"); openIdx = ctx.length - 1; renderCtx(); });
+  $("clear").addEventListener("click", () => { ctx = []; openIdx = -1; renderCtx(); });
   PRESETS.forEach(([name, cols]) => { const b = document.createElement("button"); b.className = "chip"; b.type = "button";
     b.innerHTML = cols.map(c => `<span class="dot" style="background:${c}"></span>`).join("") + " " + name;
-    b.addEventListener("click", () => { ctx = cols.slice(); renderCtx(); if (ready) run(); }); $("presets").append(b); });
+    b.addEventListener("click", () => { ctx = cols.slice(); openIdx = -1; renderCtx(); if (ready) run(); }); $("presets").append(b); });
 
   function status(lines) { $("status").innerHTML = lines.map(([cls, s]) => `<span class="${cls || ""}">${s}</span>`).join(""); }
 
@@ -149,7 +198,7 @@
   function swatch(hex, fixed) {
     const d = document.createElement("div"); d.className = "sw" + (fixed ? " fixed" : "");
     const box = document.createElement("div"); box.className = "box" + (fixed ? " fixed" : ""); box.style.background = hex; box.title = fixed ? "Fixed color" : "Lock this color into your set";
-    if (!fixed) { box.tabIndex = 0; box.setAttribute("role", "button"); const lock = () => { if (ctx.length < 4) { ctx.push(hex); renderCtx(); run(); } };
+    if (!fixed) { box.tabIndex = 0; box.setAttribute("role", "button"); const lock = () => { if (ctx.length < 4) { ctx.push(hex); openIdx = -1; renderCtx(); run(); } };
       box.addEventListener("click", lock); box.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); lock(); } }); }
     const hx = document.createElement("div"); hx.className = "hex"; hx.textContent = hex;
     d.append(box, hx); return d;
