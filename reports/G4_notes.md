@@ -19,3 +19,12 @@
 - Single seed per cell until the addendum below; conclusions rest on effect sizes being small, not on significance tests.
 - Parameter counts are close but not matched (630k–1.45M). Compute matched by steps, not FLOPs.
 - All evaluation is on Kuler-derived data and the DeepSets scorer trained on the same rating population. The fresh human study (Phase 6 package) is the real test.
+
+## Addendum: seed variance (seed 0 / seed 1)
+
+| Model | Common val loss | seed |Δ| | Scorer mean | Diversity | Gamut rate raw |
+| --- | --- | --- | --- | --- | --- |
+| mabs | 1.0593 / 1.0532 | 0.0062 | 2.773 / 2.763 | 0.207 / 0.212 | 0.905 / 0.886 |
+| geomlite | 1.0585 / 1.0566 | 0.0019 | 2.763 / 2.767 | 0.208 / 0.207 | 0.901 / 0.890 |
+
+Seed-to-seed spread in common val loss is 0.0062; the M-abs vs M-geomlite gap at 100% data is 0.0013 (two-seed means 1.0562 vs 1.0575). The 10% and 1% gaps (0.020, 0.024, opposite signs) are of the same order as this spread. Conclusion unchanged: no measurable geometry effect.

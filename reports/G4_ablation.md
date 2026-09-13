@@ -6,10 +6,12 @@
 | baseline:retrieval | — | 100% | — | — | — | — | — | 0.228 | 1.000 | 0.003 | 2.682 | 0.125 | 0.229 |
 | baseline:kde | — | 100% | — | — | — | — | — | 0.253 | 0.792 | 0.020 | 2.702 | 0.132 | 0.246 |
 | mabs | 819,459 | 100% | 45,924 | 897.9 | 1.0753 | 1.0753 (20000) | 1.0593 | 0.207 | 0.905 | 0.023 | 2.773 | 0.120 | 0.248 |
+| mabs_s1 | 819,459 | 100% | 45,924 | 295.5 | 1.0699 | 1.0699 (20000) | 1.0532 | 0.212 | 0.886 | 0.014 | 2.763 | 0.120 | 0.242 |
 | mabs_f10 | 819,459 | 10% | 4,592 | 526.2 | 1.2385 | 1.1163 (6000) | 1.2244 | 0.199 | 0.910 | 0.017 | 2.778 | 0.122 | 0.233 |
 | mabs_f01 | 819,459 | 1% | 459 | 528.5 | 3.6376 | 1.3125 (2000) | 3.5472 | 0.136 | 0.973 | 0.023 | 2.780 | 0.144 | 0.220 |
 | mabs_subset | 819,459 | 100% | 45,924 | 999.2 | 1.1279 | 1.1279 (20000) | 1.0684 | 0.210 | 0.893 | 0.017 | 2.761 | 0.121 | 0.250 |
 | geomlite | 839,443 | 100% | 45,924 | 995.1 | 1.0766 | 1.0766 (20000) | 1.0585 | 0.208 | 0.901 | 0.020 | 2.763 | 0.119 | 0.242 |
+| geomlite_s1 | 839,443 | 100% | 45,924 | 299.1 | 1.0740 | 1.0740 (20000) | 1.0566 | 0.207 | 0.890 | 0.023 | 2.767 | 0.120 | 0.242 |
 | geomlite_f10 | 839,443 | 10% | 4,592 | 453.3 | 1.2645 | 1.1159 (6000) | 1.2448 | 0.195 | 0.917 | 0.017 | 2.774 | 0.125 | 0.232 |
 | geomlite_f01 | 839,443 | 1% | 459 | 451.1 | 3.7365 | 1.2890 (2000) | 3.6328 | 0.132 | 0.971 | 0.037 | 2.785 | 0.145 | 0.219 |
 | geom | 630,005 | 100% | 45,924 | 1214.9 | 1.1213 | 1.1213 (20000) | 1.1044 | 0.205 | 0.757 | 0.028 | 2.781 | 0.122 | 0.266 |
@@ -35,4 +37,13 @@
 - Single seed per cell until the addendum below; conclusions rest on effect sizes being small, not on significance tests.
 - Parameter counts are close but not matched (630k–1.45M). Compute matched by steps, not FLOPs.
 - All evaluation is on Kuler-derived data and the DeepSets scorer trained on the same rating population. The fresh human study (Phase 6 package) is the real test.
+
+## Addendum: seed variance (seed 0 / seed 1)
+
+| Model | Common val loss | seed |Δ| | Scorer mean | Diversity | Gamut rate raw |
+| --- | --- | --- | --- | --- | --- |
+| mabs | 1.0593 / 1.0532 | 0.0062 | 2.773 / 2.763 | 0.207 / 0.212 | 0.905 / 0.886 |
+| geomlite | 1.0585 / 1.0566 | 0.0019 | 2.763 / 2.767 | 0.208 / 0.207 | 0.901 / 0.890 |
+
+Seed-to-seed spread in common val loss is 0.0062; the M-abs vs M-geomlite gap at 100% data is 0.0013 (two-seed means 1.0562 vs 1.0575). The 10% and 1% gaps (0.020, 0.024, opposite signs) are of the same order as this spread. Conclusion unchanged: no measurable geometry effect.
 
