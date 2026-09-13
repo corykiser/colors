@@ -150,7 +150,7 @@ def sample_dpmpp2m(model: Denoiser, sched: VPSchedule, x_ctx: Tensor, is_fixed: 
         h = l_next - l_cur
         a_next = ac[ts[i + 1]] if i + 1 < steps else torch.tensor(1.0, device=x.device)
         s_cur, s_next = (1 - ac[ts[i]]).sqrt(), (1 - a_next).sqrt()
-        if prev_x0 is None or i + 1 == steps:
+        if prev_x0 is None or i + 1 == steps or i < 2:   # first-order until two *informative* predictions exist
             d = x0
         else:
             r = (l_cur - lam(i - 1)) / h

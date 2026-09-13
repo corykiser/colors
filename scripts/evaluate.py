@@ -22,16 +22,20 @@ def main(dirs):
     norm = fit_or_load_norm(); val = load_arrays(("kuler", "mturk2014"), "val", norm)
     out = {}
     for d in dirs:
-        model, sched, _, device = load_model(str(ROOT / d / "model_ema.pt"))
+        ck = ROOT / d / ("model_best.pt" if (ROOT / d / "model_best.pt").exists() else "model_ema.pt")
+        model, sched, _, device = load_model(str(ck))
         batches = fixed_val_batches(val, SamplerConfig(seed=0, **cfg["sampler"]), sched, n_batches=16)
+        # NOTE: flow-matching and sRGB models use a different objective / representation; their common loss is
+        # reported but only comparable within the same objective and space.
         tot, by_m = 0.0, {}
         for b in batches:
             x0, f, m, t, noise = (b[k].to(device) for k in ("x0", "is_fixed", "mask", "t", "noise"))
             tgt = m & ~f
             xt = torch.where(tgt[..., None], sched.q_sample(x0, t, noise), x0)
             eps = model(xt, f, m, t, None)
-            tot += masked_eps_loss(eps, noise, tgt).item()
-            se = (((eps - noise) ** 2).sum(-1) * tgt).sum(1) / tgt.sum(1).clamp(min=1)
+            y = sched.target(x0, noise) if hasattr(sched, "target") else noise   # flow models predict velocity
+            tot += masked_eps_loss(eps, y, tgt).item()
+            se = (((eps - y) ** 2).sum(-1) * tgt).sum(1) / tgt.sum(1).clamp(min=1)
             for mm in range(1, 6):
                 sel = tgt.sum(1) == mm
                 if sel.any():
