@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palette Completion Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #ececea; --panel: #f6f6f4; --ink: #1f2022; --ink-2: #5c5e63; --line: #d3d3d0; --line-2: #bdbdba;
+    --accent: #2e5a88; --accent-ink: #ffffff; --swatch-edge: rgba(0,0,0,.14); --fixed-ring: #1f2022; --ok: #3a7d4f; --warn: #a3651c;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #1b1c1e; --panel: #242528; --ink: #ecebe7; --ink-2: #a2a39f; --line: #35373b; --line-2: #4a4c51;
+    --accent: #8db7e4; --accent-ink: #101214; --swatch-edge: rgba(255,255,255,.12); --fixed-ring: #ecebe7; --ok: #7fc493; --warn: #d9a25a;
+  } }
+  :root[data-theme="dark"] {
+    --bg: #1b1c1e; --panel: #242528; --ink: #ecebe7; --ink-2: #a2a39f; --line: #35373b; --line-2: #4a4c51;
+    --accent: #8db7e4; --accent-ink: #101214; --swatch-edge: rgba(255,255,255,.12); --fixed-ring: #ecebe7; --ok: #7fc493; --warn: #d9a25a;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.5 "IBM Plex Sans", system-ui, sans-serif; padding-block: 28px 56px; padding-inline: clamp(16px, 4vw, 48px); margin: 0; }
+  h1 { font: 700 clamp(28px, 4vw, 40px)/1.05 "Bricolage Grotesque", "IBM Plex Sans", sans-serif; letter-spacing: -0.01em; margin: 0 0 6px; text-wrap: balance; }
+  .sub { color: var(--ink-2); max-width: 62ch; margin: 0 0 26px; }
+  .layout { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+  .rail { background: var(--panel); border: 1px solid var(--line); padding: 18px; display: grid; gap: 18px; }
+  .label { font: 500 11px/1 "IBM Plex Sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 8px; }
+  .ctx { display: grid; gap: 8px; }
+  .hint { font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
+  .ctx-item { border: 1px solid var(--line-2); background: var(--bg); }
+  .ctx-item.open { border-color: var(--ink-2); }
+  .cbtn { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 12px; width: 100%; padding: 6px; background: none; border: 0; color: var(--ink); cursor: pointer; text-align: left; font: inherit; }
+  .cbtn .chipsw { height: 44px; border: 1px solid var(--swatch-edge); }
+  .cbtn .hexlbl { font: 14px "IBM Plex Mono", monospace; }
+  .cbtn .edit { font: 500 11px "IBM Plex Sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); padding-right: 6px; }
+  .editor { display: grid; gap: 12px; padding: 10px 10px 12px; border-top: 1px solid var(--line); }
+  .picker { display: grid; gap: 10px; }
+  .plane { position: relative; width: 100%; aspect-ratio: 1.6; max-height: 220px; touch-action: none; cursor: crosshair; border: 1px solid var(--swatch-edge); }
+  .plane canvas, .huebar canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .huebar { position: relative; height: 36px; touch-action: none; cursor: pointer; border: 1px solid var(--swatch-edge); }
+  .mark { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 0 0 1.5px #000, inset 0 0 0 1px #000; transform: translate(-50%, -50%); pointer-events: none; }
+  .huebar .mark { top: 50%; height: 44px; width: 12px; border-radius: 4px; }
+  .axes { display: flex; justify-content: space-between; font: 11px "IBM Plex Mono", monospace; color: var(--ink-2); }
+  .editor .foot { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
+  .editor input[type=text] { font: 14px "IBM Plex Mono", monospace; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); padding: 8px 9px; width: 100%; min-width: 0; }
+  .x { background: none; border: 1px solid var(--line-2); color: var(--ink-2); cursor: pointer; font: 500 13px "IBM Plex Sans", sans-serif; padding: 7px 10px; }
+  .x:hover { color: var(--ink); border-color: var(--ink-2); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip, .btn { font: 500 13px "IBM Plex Sans", sans-serif; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 7px 11px; cursor: pointer; }
+  .chip:hover, .btn:hover { border-color: var(--ink-2); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); padding: 10px 16px; font-size: 14px; }
+  .btn.primary:disabled { opacity: .55; cursor: wait; }
+  .chip .dot { display: inline-block; width: 10px; height: 10px; margin-right: 3px; vertical-align: -1px; border: 1px solid var(--swatch-edge); }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .controls label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); }
+  select, input[type=number] { font: 14px "IBM Plex Sans", sans-serif; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 7px 9px; width: 100%; }
+  .status { font: 12px "IBM Plex Mono", monospace; color: var(--ink-2); display: grid; gap: 3px; }
+  .status .ok { color: var(--ok); } .status .warn { color: var(--warn); }
+  .results { display: grid; gap: 14px; }
+  .pal { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+  .rank { font: 500 12px/1 "IBM Plex Mono", monospace; color: var(--ink-2); padding-top: 34px; }
+  .sw-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .sw { width: 76px; display: grid; gap: 5px; }
+  .sw .box { height: 76px; border: 1px solid var(--swatch-edge); cursor: pointer; position: relative; }
+  .sw.fixed .box { outline: 2px solid var(--fixed-ring); outline-offset: -4px; cursor: default; }
+  .sw .box:not(.fixed)::after { content: "tap to keep"; position: absolute; inset: auto 0 0 0; text-align: center; font: 500 9px/1.7 "IBM Plex Sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; background: color-mix(in srgb, var(--panel) 85%, transparent); color: var(--ink); opacity: .85; }
+  @media (hover: hover) { .sw .box:not(.fixed)::after { opacity: 0; } .sw .box:not(.fixed):hover::after { opacity: 1; } }
+  .sw .hex { font: 12px "IBM Plex Mono", monospace; color: var(--ink-2); }
+  .sw.fixed .hex { color: var(--ink); }
+  .meta { font: 12px "IBM Plex Mono", monospace; color: var(--ink-2); }
+  .empty { color: var(--ink-2); padding: 12px 0; max-width: 54ch; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: no-preference) { .sw .box { transition: transform .12s; } .sw .box:not(.fixed):hover { transform: translateY(-2px); } }
+  footer { margin-top: 36px; color: var(--ink-2); font-size: 13px; max-width: 70ch; }
+</style>
+</head>
+<body>
+
+<h1>Palette Completion Studio</h1>
+<p class="sub">Pick the colors you already have. The model proposes colors to add, running entirely in this page: a set transformer trained by flow matching on rated Adobe Kuler and Mechanical Turk palettes, reranked by a preference scorer fit to 528,106 human ratings.</p>
+
+<div class="layout">
+  <aside class="rail">
+    <div>
+      <p class="label">Your colors</p>
+      <p class="hint">Tap a color to change it: drag on the square for lightness and vividness, on the bar for hue, or type a hex code.</p>
+      <div class="ctx" id="ctx"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="add" type="button">Add color</button>
+        <button class="btn" id="clear" type="button">Clear</button>
+      </div>
+    </div>
+    <div>
+      <p class="label">Try a starting point</p>
+      <div class="row" id="presets"></div>
+    </div>
+    <div class="controls">
+      <label>Colors to add <select id="m"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+      <label>Alternatives <select id="k"><option>2</option><option selected>4</option><option>6</option><option>8</option></select></label>
+      <label>Sampling steps <select id="steps"><option>5</option><option>10</option><option selected>20</option><option>40</option></select></label>
+      <label>Seed <input id="seed" type="number" value="1" min="1" step="1"></label>
+    </div>
+    <button class="btn primary" id="go" type="button">Propose colors</button>
+    <div class="status" id="status"><span>Loading model weights…</span></div>
+  </aside>
+
+  <section>
+    <p class="label">Proposals</p>
+    <div class="results" id="results"><p class="empty">Your fixed colors come back unchanged and outlined. Tap any proposed swatch to keep it and ask for more.</p></div>
+    <p class="meta" id="meta"></p>
+  </section>
+</div>
+
+<footer>Swatches are shown equal-area on a neutral ground, the same protocol the model's ratings came from. Each request draws 32 candidate completions, drops any that leave the sRGB gamut or duplicate a color, ranks the rest with the scorer, and returns a spread of the best. Palettes of up to five colors in total.</footer>
+
+<script src="app.js"></script>
+<script>
+(function () {
+  const P = window.Palette; const $ = id => document.getElementById(id);
+  const PRESETS = [["sage + brown", ["#9caf88", "#6b4a2b"]], ["navy", ["#1f2a44"]], ["teal + coral", ["#1b9aaa", "#ef767a"]], ["black + white", ["#000000", "#ffffff"]], ["mustard", ["#d4a017"]], ["burgundy + cream + olive", ["#6d1a36", "#f3e9d2", "#6b7a3a"]]];
+  let ctx = ["#9caf88", "#6b4a2b"], ready = false;
+
+  // OkLCh editor. Sliders: lightness 0–1, chroma 0–0.37, hue 0–360. Out-of-gamut choices are chroma-reduced at fixed L,h.
+  const toLch = lab => [lab[0], Math.hypot(lab[1], lab[2]), (Math.atan2(lab[2], lab[1]) * 180 / Math.PI + 360) % 360];
+  const fromLch = ([L, C, h]) => [L, C * Math.cos(h * Math.PI / 180), C * Math.sin(h * Math.PI / 180)];
+  const lchToHex = lch => P.oklabToHex(P.gamutMap(fromLch(lch)));
+  // largest sRGB-reachable chroma at this lightness and hue (bisection), so the chroma slider spans real colors only
+  function maxChroma(L, h) { let lo = 0, hi = 0.4; for (let i = 0; i < 24; i++) { const mid = (lo + hi) / 2; if (P.inGamut(fromLch([L, mid, h]))) lo = mid; else hi = mid; } return lo; }
+  let openIdx = -1; const lchState = {};
+  // fn(x in 0..1) -> [L, C, h]; painted through gamut mapping so the bar shows only reachable colors
+  function paintTrack(canvas, fn) { const ctx2 = canvas.getContext("2d"), n = canvas.width; for (let i = 0; i < n; i++) { const rgb = P.oklabToSrgb(P.gamutMap(fromLch(fn(i / (n - 1))))); ctx2.fillStyle = `rgb(${rgb.map(v => Math.round(Math.min(1, Math.max(0, v)) * 255)).join(",")})`; ctx2.fillRect(i, 0, 1, canvas.height); } }
+  function renderCtx() {
+    const el = $("ctx"); el.innerHTML = "";
+    ctx.forEach((h, i) => {
+      const item = document.createElement("div"); item.className = "ctx-item" + (openIdx === i ? " open" : "");
+      const btn = document.createElement("button"); btn.type = "button"; btn.className = "cbtn"; btn.id = "cbtn" + i; btn.setAttribute("aria-expanded", openIdx === i);
+      btn.innerHTML = `<span class="chipsw" style="background:${h}"></span><span class="hexlbl">${h}</span><span class="edit">${openIdx === i ? "close" : "edit"}</span>`;
+      btn.addEventListener("click", () => { openIdx = openIdx === i ? -1 : i; renderCtx(); });
+      item.append(btn);
+      if (openIdx === i) {
+        if (!lchState[i] || lchState[i].hex !== h) lchState[i] = { hex: h, lch: toLch(P.hexToOklab(h)) };
+        const st = lchState[i]; const ed = document.createElement("div"); ed.className = "editor";
+        // Two-part picker: hue bar (spectrum) + lightness × chroma plane at that hue. The plane's x axis is the fraction of
+        // the largest sRGB-reachable chroma at each lightness, so every pixel is a real color and the gamut edge is the right edge.
+        const pk = document.createElement("div"); pk.className = "picker";
+        const plane = document.createElement("div"); plane.className = "plane"; const pc = document.createElement("canvas"); pc.width = 96; pc.height = 60; const pm = document.createElement("div"); pm.className = "mark"; plane.append(pc, pm);
+        const hb = document.createElement("div"); hb.className = "huebar"; const hc = document.createElement("canvas"); hc.width = 360; hc.height = 1; const hm = document.createElement("div"); hm.className = "mark"; hb.append(hc, hm);
+        const axes = document.createElement("div"); axes.className = "axes"; axes.innerHTML = "<span>← muted</span><span id='pkv" + i + "'></span><span>vivid →</span>";
+        const rowMax = new Float32Array(pc.height);
+        function paintPlane() { const g = pc.getContext("2d"), img = g.createImageData(pc.width, pc.height), h = st.lch[2];
+          for (let y = 0; y < pc.height; y++) { const L = 1 - y / (pc.height - 1); const cm = maxChroma(L, h); rowMax[y] = cm;
+            for (let x = 0; x < pc.width; x++) { const rgb = P.oklabToSrgb(fromLch([L, cm * x / (pc.width - 1), h])); const o = 4 * (y * pc.width + x);
+              img.data[o] = Math.round(Math.min(1, Math.max(0, rgb[0])) * 255); img.data[o + 1] = Math.round(Math.min(1, Math.max(0, rgb[1])) * 255); img.data[o + 2] = Math.round(Math.min(1, Math.max(0, rgb[2])) * 255); img.data[o + 3] = 255; } }
+          g.putImageData(img, 0, 0); }
+        function paintHue() { paintTrack(hc, x => [0.72, 0.16, x * 360]); }
+        function placeMarks() { const cm = maxChroma(st.lch[0], st.lch[2]); const fx = cm > 1e-4 ? Math.min(1, st.lch[1] / cm) : 0;
+          pm.style.left = (fx * 100) + "%"; pm.style.top = ((1 - st.lch[0]) * 100) + "%"; pm.style.background = lchToHex(st.lch);
+          hm.style.left = (st.lch[2] / 360 * 100) + "%"; hm.style.background = lchToHex([0.72, 0.16, st.lch[2]]);
+          const v = document.getElementById("pkv" + i); if (v) v.textContent = `L ${st.lch[0].toFixed(2)} · C ${st.lch[1].toFixed(3)} · H ${Math.round(st.lch[2])}°`; }
+        const repaint = () => { placeMarks(); };
+        const commit = () => { const hx = lchToHex(st.lch); ctx[i] = hx; st.hex = hx; btn.querySelector(".chipsw").style.background = hx; btn.querySelector(".hexlbl").textContent = hx; hexIn.value = hx; placeMarks(); };
+        function drag(el, onMove) { let active = false;
+          const pos = e => { const r = el.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
+          el.addEventListener("pointerdown", e => { active = true; el.setPointerCapture(e.pointerId); onMove(...pos(e)); e.preventDefault(); });
+          el.addEventListener("pointermove", e => { if (active) onMove(...pos(e)); });
+          const up = e => { if (!active) return; active = false; if (ready) run(); }; el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up); }
+        drag(plane, (fx, fy) => { const L = 1 - fy; st.lch[0] = L; st.lch[1] = fx * maxChroma(L, st.lch[2]); commit(); });
+        drag(hb, fx => { st.lch[2] = fx * 360; st.lch[1] = Math.min(st.lch[1], maxChroma(st.lch[0], st.lch[2])); paintPlane(); commit(); });
+        pk.append(plane, axes, hb); ed.append(pk); paintPlane(); paintHue();
+        const foot = document.createElement("div"); foot.className = "foot";
+        const hexIn = document.createElement("input"); hexIn.type = "text"; hexIn.value = h; hexIn.id = "hex" + i; hexIn.maxLength = 7; hexIn.setAttribute("aria-label", "hex code"); hexIn.autocomplete = "off"; hexIn.spellcheck = false;
+        hexIn.addEventListener("change", () => { const v = hexIn.value.trim().toLowerCase(); if (/^#?[0-9a-f]{6}$/.test(v)) { ctx[i] = v.startsWith("#") ? v : "#" + v; delete lchState[i]; renderCtx(); if (ready) run(); } else hexIn.value = ctx[i]; });
+        const rm = document.createElement("button"); rm.type = "button"; rm.className = "x"; rm.textContent = "Remove"; rm.addEventListener("click", () => { ctx.splice(i, 1); openIdx = -1; delete lchState[i]; renderCtx(); });
+        const done = document.createElement("button"); done.type = "button"; done.className = "x"; done.textContent = "Done"; done.addEventListener("click", () => { openIdx = -1; renderCtx(); });
+        foot.append(hexIn, rm, done); ed.append(foot); item.append(ed); placeMarks();
+      }
+      el.append(item);
+    });
+    const mSel = $("m"); [...mSel.options].forEach(o => { o.disabled = ctx.length + +o.value > 5; });
+    if (mSel.selectedOptions[0].disabled) mSel.value = String(Math.max(1, 5 - ctx.length));
+    $("add").disabled = ctx.length >= 4;
+  }
+  $("add").addEventListener("click", () => { ctx.push("#808080"); openIdx = ctx.length - 1; renderCtx(); });
+  $("clear").addEventListener("click", () => { ctx = []; openIdx = -1; renderCtx(); });
+  PRESETS.forEach(([name, cols]) => { const b = document.createElement("button"); b.className = "chip"; b.type = "button";
+    b.innerHTML = cols.map(c => `<span class="dot" style="background:${c}"></span>`).join("") + " " + name;
+    b.addEventListener("click", () => { ctx = cols.slice(); openIdx = -1; renderCtx(); if (ready) run(); }); $("presets").append(b); });
+
+  function status(lines) { $("status").innerHTML = lines.map(([cls, s]) => `<span class="${cls || ""}">${s}</span>`).join(""); }
+
+  function run() {
+    if (!ready) return;
+    const m = +$("m").value, k = +$("k").value, steps = +$("steps").value, seed = +$("seed").value || 1;
+    if (ctx.length + m > 5) { status([["warn", "Palettes are at most five colors. Remove a color or add fewer."]]); return; }
+    $("go").disabled = true; $("go").textContent = "Sampling…";
+    setTimeout(() => {
+      const t0 = performance.now();
+      try {
+        const r = P.complete(ctx.map(P.hexToOklab), m, k, { steps, seed });
+        const el = $("results"); el.innerHTML = "";
+        r.palettes.forEach(p => {
+          const pal = document.createElement("div"); pal.className = "pal";
+          const rank = document.createElement("div"); rank.className = "rank"; rank.textContent = "#" + p.rank; rank.title = "Scorer rank among " + r.poolSize + " valid candidates";
+          const row = document.createElement("div"); row.className = "sw-row";
+          ctx.forEach(h => row.append(swatch(h, true)));
+          p.colors.forEach(lab => row.append(swatch(P.oklabToHex(lab), false)));
+          pal.append(rank, row); el.append(pal);
+        });
+        const ms = Math.round(performance.now() - t0);
+        $("meta").textContent = `${r.stats.raw} candidates · ${r.stats.inGamut} in gamut · ${r.stats.dup} duplicate-rejected · ${r.stats.mapped} chroma-mapped · ${ms} ms`;
+      } catch (e) { $("results").innerHTML = `<p class="empty">${e.message}</p>`; }
+      $("go").disabled = false; $("go").textContent = "Propose colors";
+    }, 20);
+  }
+  function swatch(hex, fixed) {
+    const d = document.createElement("div"); d.className = "sw" + (fixed ? " fixed" : "");
+    const box = document.createElement("div"); box.className = "box" + (fixed ? " fixed" : ""); box.style.background = hex; box.title = fixed ? "Fixed color" : "Lock this color into your set";
+    if (!fixed) { box.tabIndex = 0; box.setAttribute("role", "button"); const lock = () => { if (ctx.length < 4) { ctx.push(hex); openIdx = -1; renderCtx(); run(); } };
+      box.addEventListener("click", lock); box.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); lock(); } }); }
+    const hx = document.createElement("div"); hx.className = "hex"; hx.textContent = hex;
+    d.append(box, hx); return d;
+  }
+  $("go").addEventListener("click", run);
+
+  renderCtx();
+  P.loadModel().then(man => {
+    const chk = P.selfCheck(); ready = true;
+    const tag = man.diffusion.kind === "flow" ? "flow matching" : "VP diffusion";
+    status([[chk.err < 5e-3 ? "ok" : "warn", `model check ${chk.err < 5e-3 ? "passed" : "FAILED"} (max |Δ| ${chk.err.toExponential(1)} vs PyTorch)`], ["", `${man.run.replace("experiments/", "")} · ${tag} · ${(man.bytes / 1e6).toFixed(1)} MB weights`]]);
+    run();
+  }).catch(e => status([["warn", "Could not load model: " + e.message]]));
+})();
+</script>
+</body>
+</html>

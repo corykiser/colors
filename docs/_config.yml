@@ -1,0 +1,4 @@
+title: Palette completion
+description: A small conditional set-diffusion model for color palettes, and what evaluating it honestly took
+theme: jekyll-theme-minimal
+include: [demo]
