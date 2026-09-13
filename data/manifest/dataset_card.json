@@ -1,0 +1,91 @@
+{
+  "seed": 0,
+  "dedup": {
+    "n_records": 453358,
+    "n_groups": 406315,
+    "exact_duplicate_rows": 26094,
+    "near_candidate_pairs": 54977700,
+    "near_duplicate_pairs": 166717,
+    "threshold": 0.02,
+    "largest_group": 11096,
+    "rows_in_multi_groups": 66174,
+    "seconds": 300.1
+  },
+  "per_family": {
+    "mturk2014": {
+      "records": 13343,
+      "groups": 12855,
+      "by_split": {
+        "train": 10530,
+        "val": 1439,
+        "test": 1374
+      },
+      "by_size": {
+        "5": 13343
+      }
+    },
+    "mturk2011": {
+      "records": 10743,
+      "groups": 10397,
+      "by_split": {
+        "train": 8461,
+        "val": 1164,
+        "test": 1118
+      },
+      "by_size": {
+        "5": 10743
+      }
+    },
+    "kuler": {
+      "records": 44986,
+      "groups": 42692,
+      "by_split": {
+        "train": 35394,
+        "val": 4974,
+        "test": 4618
+      },
+      "by_size": {
+        "5": 44986
+      }
+    },
+    "colourlovers": {
+      "records": 383938,
+      "groups": 363993,
+      "by_split": {
+        "train": 299161,
+        "val": 47667,
+        "test": 37110
+      },
+      "by_size": {
+        "5": 383938
+      }
+    },
+    "wada": {
+      "records": 348,
+      "groups": 348,
+      "by_split": {
+        "train": 280,
+        "val": 34,
+        "test": 34
+      },
+      "by_size": {
+        "2": 120,
+        "3": 120,
+        "4": 108
+      }
+    }
+  },
+  "cross_family_groups": {
+    "kuler + mturk2011 + mturk2014": 9917,
+    "kuler + mturk2014": 2353,
+    "colourlovers + kuler": 589,
+    "colourlovers + kuler + mturk2011 + mturk2014": 302,
+    "mturk2011 + mturk2014": 176,
+    "colourlovers + kuler + mturk2014": 54,
+    "colourlovers + mturk2011 + mturk2014": 2
+  },
+  "users_mturk2014": {
+    "n": 1137,
+    "heldout": 114
+  }
+}
