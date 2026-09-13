@@ -4,8 +4,8 @@ Conditional color palette generation: given any subset of colors, propose additi
 A conditional set-diffusion model over Oklab, with permutation-invariant conditioning and an ablation on
 hue-rotation-equivariant geometry.
 
-The contract for this project is [`palette_model_handoff.md`](palette_model_handoff.md). Read it first.
-Progress against its phases is tracked in [`STATUS.md`](STATUS.md).
+The project follows a private specification (not in this repository); the phase numbers and gates referenced in
+`STATUS.md` and `reports/` come from it. Progress is tracked in [`STATUS.md`](STATUS.md).
 
 ## Setup
 
