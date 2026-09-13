@@ -28,7 +28,7 @@
 
 **The exact-equivariant pathway alone (M-geom) is worse** on val loss (1.104 vs 1.059) and its raw gamut validity collapses to 76% (vs 90%): a hue-rotation-equivariant denoiser cannot represent the sRGB gamut's asymmetry in Oklab, exactly as R1/R4 predicted. It still scores well after gamut mapping (scorer mean 2.78) because the pipeline maps its out-of-gamut samples back — but that mapping is doing part of the work.
 
-**M-combined is the best single number** (1.054 vs 1.059) at 1.77× the parameters and 1.6× the training time; the absolute/geometric noise-norm ratio settled at ~0.9, so neither pathway dominated. A parameter-matched M-abs (dim 176 or depth 7) is the fair comparison and has not been run; a 0.5% loss improvement at this cost does not justify the added architectural constraints.
+**M-combined posts the lowest single-seed number** (1.054 vs 1.059), but the second M-abs seed reached 1.053, so this is within seed noise — at 1.77× the parameters and 1.6× the training time; the absolute/geometric noise-norm ratio settled at ~0.9, so neither pathway dominated. A parameter-matched M-abs (dim 176 or depth 7) is the fair comparison and has not been run; a 0.5% loss improvement at this cost does not justify the added architectural constraints.
 
 **Recommendation:** ship M-abs (with `subset_augment`, per G3) as the generator. Keep the geometric code as a tested ablation; drop it from the deployment path. The central hypothesis (§1.1) — relative geometry provides useful parameter sharing — is not supported at this data size for this task; the 45k-palette corpus is enough for the absolute model to learn the geometry itself.
 
