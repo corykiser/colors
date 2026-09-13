@@ -5,10 +5,10 @@
 | 0 Data audit | G0 | **done** | `data/manifest/AUDIT.md`. Kuler archive = 44,986 themes (not 104k). PAT unavailable (404). |
 | 1 Data pipeline | G1 | **done** | `data/manifest/dataset_card.json`. 453,358 records, 406,315 duplicate groups. One single-linkage chain of 11,096 pale near-neutral palettes (mostly COLOURlovers) at the 0.02 threshold; kept as one group (conservative for leakage), see note below. |
 | 2 Eval harness + baselines | G2 | **done** | `reports/G2_baselines.md`. DeepSets scorer Spearman 0.74 on test; ordered scorer does not win (R3). Retrieval is the baseline to beat. |
-| 3 M-abs diffusion | G3 | in progress | model, sampler, training script, invariance tests done; full runs in `experiments/` |
-| 4 Geometric variants | G4 | not started | |
-| 5 Sampling pipeline | G5 | not started | |
-| 6 Human-eval prep | — | not started | |
+| 3 M-abs diffusion | G3 | **done** | `reports/G3_mabs.md`. M-abs (819k params, 15 min on M5 Max) beats retrieval on scorer mean and reconstruction. Subset augmentation costs ~0.01 val loss on 5-color data. |
+| 4 Geometric variants | G4 | in progress | geomlite / geom / combined and 1%/10% learning-curve runs training |
+| 5 Sampling pipeline | G5 | **done** | `palette/api.py`: rejection → repulsion → chroma-reduction fallback, scorer rerank, greedy diverse top-k; `scripts/sample.py` CLI |
+| 6 Human-eval prep | — | **done** (no collection) | `scripts/make_study_package.py`, `reports/pilot_protocol.md`, `scripts/power_stub.py` |
 
 ## G1 notes
 
