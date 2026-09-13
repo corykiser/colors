@@ -42,13 +42,20 @@ def g2():
 
 def g3(dirs: list[str], title="G3 — Diffusion models vs baselines", fname="G3_mabs.md"):
     bl = json.load(open(ROOT / "experiments/baselines/metrics.json"))
-    L = [f"# {title}", "", "| Run | Params | Train palettes | Train s | Final val loss | " + " | ".join(GEN_COLS) + " |",
-         "| --- | --- | --- | --- | --- | " + " | ".join("---" for _ in GEN_COLS) + " |"]
+    cv = json.load(open(ROOT / "experiments/common_val.json")) if (ROOT / "experiments/common_val.json").exists() else {}
+    L = [f"# {title}", "", "| Run | Params | Data | Train palettes | Train s | Final val loss | Best val loss (step) | Common val loss | " + " | ".join(GEN_COLS) + " |",
+         "| --- | --- | --- | --- | --- | --- | --- | --- | " + " | ".join("---" for _ in GEN_COLS) + " |"]
     for name, r in bl["results"].items():
-        s = r["summary"]; L.append(f"| baseline:{name} | — | — | — | — | " + " | ".join(fmt(s.get(k, '—')) for k in GEN_COLS) + " |")
+        s = r["summary"]; L.append(f"| baseline:{name} | — | 100% | — | — | — | — | — | " + " | ".join(fmt(s.get(k, '—')) for k in GEN_COLS) + " |")
     for d in dirs:
         m = json.load(open(ROOT / d / "metrics.json"))
-        L.append(f"| {m['name'].replace('experiments/', '')} | {m['params']:,} | {m['train_palettes']:,} | {m['train_seconds']} | {m['final_val_loss']:.4f} | " + " | ".join(fmt(m.get(k, '—')) for k in GEN_COLS) + " |")
+        best = min(m["history"], key=lambda h: h["val_loss"])
+        frac = m["config"]["data"].get("fraction", 1.0)
+        c = cv.get(d, {}).get("common_val_loss"); c = f"{c:.4f}" if c is not None else "—"
+        L.append(f"| {m['name'].replace('experiments/', '')} | {m['params']:,} | {int(frac*100)}% | {m['train_palettes']:,} | {m['train_seconds']} | {m['final_val_loss']:.4f} | {best['val_loss']:.4f} ({best['step']}) | {c} | " + " | ".join(fmt(m.get(k, '—')) for k in GEN_COLS) + " |")
+    notes = REP / fname.replace(".md", "_notes.md").replace("G3_mabs_notes", "G3_notes")
+    if fname == "G4_ablation.md" and (REP / "G4_notes.md").exists():
+        L.append((REP / "G4_notes.md").read_text())
     (REP / fname).write_text("\n".join(L) + "\n")
     print("\n".join(L))
 
