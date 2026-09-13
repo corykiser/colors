@@ -1,0 +1,167 @@
+<title>Palette Completion Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #ececea; --panel: #f6f6f4; --ink: #1f2022; --ink-2: #5c5e63; --line: #d3d3d0; --line-2: #bdbdba;
+    --accent: #2e5a88; --accent-ink: #ffffff; --swatch-edge: rgba(0,0,0,.14); --fixed-ring: #1f2022; --ok: #3a7d4f; --warn: #a3651c;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #1b1c1e; --panel: #242528; --ink: #ecebe7; --ink-2: #a2a39f; --line: #35373b; --line-2: #4a4c51;
+    --accent: #8db7e4; --accent-ink: #101214; --swatch-edge: rgba(255,255,255,.12); --fixed-ring: #ecebe7; --ok: #7fc493; --warn: #d9a25a;
+  } }
+  :root[data-theme="dark"] {
+    --bg: #1b1c1e; --panel: #242528; --ink: #ecebe7; --ink-2: #a2a39f; --line: #35373b; --line-2: #4a4c51;
+    --accent: #8db7e4; --accent-ink: #101214; --swatch-edge: rgba(255,255,255,.12); --fixed-ring: #ecebe7; --ok: #7fc493; --warn: #d9a25a;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.5 "IBM Plex Sans", system-ui, sans-serif; padding-block: 28px 56px; padding-inline: clamp(16px, 4vw, 48px); margin: 0; }
+  h1 { font: 700 clamp(28px, 4vw, 40px)/1.05 "Bricolage Grotesque", "IBM Plex Sans", sans-serif; letter-spacing: -0.01em; margin: 0 0 6px; text-wrap: balance; }
+  .sub { color: var(--ink-2); max-width: 62ch; margin: 0 0 26px; }
+  .layout { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+  .rail { background: var(--panel); border: 1px solid var(--line); padding: 18px; display: grid; gap: 18px; }
+  .label { font: 500 11px/1 "IBM Plex Sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 8px; }
+  .ctx { display: grid; gap: 8px; }
+  .ctx-row { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; }
+  .ctx-row input[type=color] { width: 44px; height: 36px; border: 1px solid var(--line-2); background: none; padding: 2px; cursor: pointer; }
+  .ctx-row input[type=text] { font: 14px "IBM Plex Mono", monospace; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 7px 9px; width: 100%; }
+  .x { background: none; border: 1px solid transparent; color: var(--ink-2); cursor: pointer; font-size: 18px; line-height: 1; padding: 6px 8px; }
+  .x:hover { color: var(--ink); border-color: var(--line-2); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip, .btn { font: 500 13px "IBM Plex Sans", sans-serif; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 7px 11px; cursor: pointer; }
+  .chip:hover, .btn:hover { border-color: var(--ink-2); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); padding: 10px 16px; font-size: 14px; }
+  .btn.primary:disabled { opacity: .55; cursor: wait; }
+  .chip .dot { display: inline-block; width: 10px; height: 10px; margin-right: 3px; vertical-align: -1px; border: 1px solid var(--swatch-edge); }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .controls label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); }
+  select, input[type=number] { font: 14px "IBM Plex Sans", sans-serif; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 7px 9px; width: 100%; }
+  .status { font: 12px "IBM Plex Mono", monospace; color: var(--ink-2); display: grid; gap: 3px; }
+  .status .ok { color: var(--ok); } .status .warn { color: var(--warn); }
+  .results { display: grid; gap: 14px; }
+  .pal { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+  .rank { font: 500 12px/1 "IBM Plex Mono", monospace; color: var(--ink-2); padding-top: 34px; }
+  .sw-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .sw { width: 76px; display: grid; gap: 5px; }
+  .sw .box { height: 76px; border: 1px solid var(--swatch-edge); cursor: pointer; position: relative; }
+  .sw.fixed .box { outline: 2px solid var(--fixed-ring); outline-offset: -4px; cursor: default; }
+  .sw .box:not(.fixed):hover::after { content: "lock"; position: absolute; inset: auto 0 0 0; text-align: center; font: 500 10px/1.6 "IBM Plex Sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; background: var(--panel); color: var(--ink); }
+  .sw .hex { font: 12px "IBM Plex Mono", monospace; color: var(--ink-2); }
+  .sw.fixed .hex { color: var(--ink); }
+  .meta { font: 12px "IBM Plex Mono", monospace; color: var(--ink-2); }
+  .empty { color: var(--ink-2); padding: 12px 0; max-width: 54ch; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: no-preference) { .sw .box { transition: transform .12s; } .sw .box:not(.fixed):hover { transform: translateY(-2px); } }
+  footer { margin-top: 36px; color: var(--ink-2); font-size: 13px; max-width: 70ch; }
+</style>
+
+<h1>Palette Completion Studio</h1>
+<p class="sub">Pick the colors you already have. The model proposes colors to add, running entirely in this page: a set transformer trained by flow matching on rated Adobe Kuler and Mechanical Turk palettes, reranked by a preference scorer fit to 528,106 human ratings.</p>
+
+<div class="layout">
+  <aside class="rail">
+    <div>
+      <p class="label">Your colors</p>
+      <div class="ctx" id="ctx"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="add" type="button">Add color</button>
+        <button class="btn" id="clear" type="button">Clear</button>
+      </div>
+    </div>
+    <div>
+      <p class="label">Try a starting point</p>
+      <div class="row" id="presets"></div>
+    </div>
+    <div class="controls">
+      <label>Colors to add <select id="m"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+      <label>Alternatives <select id="k"><option>2</option><option selected>4</option><option>6</option><option>8</option></select></label>
+      <label>Sampling steps <select id="steps"><option>5</option><option selected>10</option><option>20</option></select></label>
+      <label>Seed <input id="seed" type="number" value="1" min="1" step="1"></label>
+    </div>
+    <button class="btn primary" id="go" type="button">Propose colors</button>
+    <div class="status" id="status"><span>Loading model weights…</span></div>
+  </aside>
+
+  <section>
+    <p class="label">Proposals</p>
+    <div class="results" id="results"><p class="empty">Your fixed colors come back unchanged and outlined. Click any proposed swatch to lock it in and ask for more.</p></div>
+    <p class="meta" id="meta"></p>
+  </section>
+</div>
+
+<footer>Swatches are shown equal-area on a neutral ground, the same protocol the model's ratings came from. Each request draws 32 candidate completions, drops any that leave the sRGB gamut or duplicate a color, ranks the rest with the scorer, and returns a spread of the best. Palettes of up to five colors in total.</footer>
+
+<script src="app.js"></script>
+<script>
+(function () {
+  const P = window.Palette; const $ = id => document.getElementById(id);
+  const PRESETS = [["sage + brown", ["#9caf88", "#6b4a2b"]], ["navy", ["#1f2a44"]], ["teal + coral", ["#1b9aaa", "#ef767a"]], ["black + white", ["#000000", "#ffffff"]], ["mustard", ["#d4a017"]], ["burgundy + cream + olive", ["#6d1a36", "#f3e9d2", "#6b7a3a"]]];
+  let ctx = ["#9caf88", "#6b4a2b"], ready = false;
+
+  function renderCtx() {
+    const el = $("ctx"); el.innerHTML = "";
+    ctx.forEach((h, i) => {
+      const row = document.createElement("div"); row.className = "ctx-row";
+      const c = document.createElement("input"); c.type = "color"; c.value = h; c.id = "c" + i; c.setAttribute("aria-label", "color " + (i + 1));
+      const t = document.createElement("input"); t.type = "text"; t.value = h; t.id = "t" + i; t.maxLength = 7; t.setAttribute("aria-label", "hex " + (i + 1));
+      const x = document.createElement("button"); x.className = "x"; x.type = "button"; x.textContent = "×"; x.title = "Remove";
+      c.addEventListener("input", () => { ctx[i] = c.value; t.value = c.value; });
+      t.addEventListener("change", () => { const v = t.value.trim().toLowerCase(); if (/^#?[0-9a-f]{6}$/.test(v)) { ctx[i] = v.startsWith("#") ? v : "#" + v; renderCtx(); } else t.value = ctx[i]; });
+      x.addEventListener("click", () => { ctx.splice(i, 1); renderCtx(); });
+      row.append(c, t, x); el.append(row);
+    });
+    const mSel = $("m"); [...mSel.options].forEach(o => { o.disabled = ctx.length + +o.value > 5; });
+    if (mSel.selectedOptions[0].disabled) mSel.value = String(Math.max(1, 5 - ctx.length));
+    $("add").disabled = ctx.length >= 4;
+  }
+  $("add").addEventListener("click", () => { ctx.push("#808080"); renderCtx(); });
+  $("clear").addEventListener("click", () => { ctx = []; renderCtx(); });
+  PRESETS.forEach(([name, cols]) => { const b = document.createElement("button"); b.className = "chip"; b.type = "button";
+    b.innerHTML = cols.map(c => `<span class="dot" style="background:${c}"></span>`).join("") + " " + name;
+    b.addEventListener("click", () => { ctx = cols.slice(); renderCtx(); if (ready) run(); }); $("presets").append(b); });
+
+  function status(lines) { $("status").innerHTML = lines.map(([cls, s]) => `<span class="${cls || ""}">${s}</span>`).join(""); }
+
+  function run() {
+    if (!ready) return;
+    const m = +$("m").value, k = +$("k").value, steps = +$("steps").value, seed = +$("seed").value || 1;
+    if (ctx.length + m > 5) { status([["warn", "Palettes are at most five colors. Remove a color or add fewer."]]); return; }
+    $("go").disabled = true; $("go").textContent = "Sampling…";
+    setTimeout(() => {
+      const t0 = performance.now();
+      try {
+        const r = P.complete(ctx.map(P.hexToOklab), m, k, { steps, seed });
+        const el = $("results"); el.innerHTML = "";
+        r.palettes.forEach(p => {
+          const pal = document.createElement("div"); pal.className = "pal";
+          const rank = document.createElement("div"); rank.className = "rank"; rank.textContent = "#" + p.rank; rank.title = "Scorer rank among " + r.poolSize + " valid candidates";
+          const row = document.createElement("div"); row.className = "sw-row";
+          ctx.forEach(h => row.append(swatch(h, true)));
+          p.colors.forEach(lab => row.append(swatch(P.oklabToHex(lab), false)));
+          pal.append(rank, row); el.append(pal);
+        });
+        const ms = Math.round(performance.now() - t0);
+        $("meta").textContent = `${r.stats.raw} candidates · ${r.stats.inGamut} in gamut · ${r.stats.dup} duplicate-rejected · ${r.stats.mapped} chroma-mapped · ${ms} ms`;
+      } catch (e) { $("results").innerHTML = `<p class="empty">${e.message}</p>`; }
+      $("go").disabled = false; $("go").textContent = "Propose colors";
+    }, 20);
+  }
+  function swatch(hex, fixed) {
+    const d = document.createElement("div"); d.className = "sw" + (fixed ? " fixed" : "");
+    const box = document.createElement("div"); box.className = "box" + (fixed ? " fixed" : ""); box.style.background = hex; box.title = fixed ? "Fixed color" : "Lock this color into your set";
+    if (!fixed) { box.tabIndex = 0; box.setAttribute("role", "button"); const lock = () => { if (ctx.length < 4) { ctx.push(hex); renderCtx(); run(); } };
+      box.addEventListener("click", lock); box.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); lock(); } }); }
+    const hx = document.createElement("div"); hx.className = "hex"; hx.textContent = hex;
+    d.append(box, hx); return d;
+  }
+  $("go").addEventListener("click", run);
+
+  renderCtx();
+  P.loadModel().then(man => {
+    const chk = P.selfCheck(); ready = true;
+    const tag = man.diffusion.kind === "flow" ? "flow matching" : "VP diffusion";
+    status([[chk.err < 5e-3 ? "ok" : "warn", `model check ${chk.err < 5e-3 ? "passed" : "FAILED"} (max |Δ| ${chk.err.toExponential(1)} vs PyTorch)`], ["", `${man.run.replace("experiments/", "")} · ${tag} · ${(man.bytes / 1e6).toFixed(1)} MB weights`]]);
+    run();
+  }).catch(e => status([["warn", "Could not load model: " + e.message]]));
+})();
+</script>
