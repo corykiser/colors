@@ -67,3 +67,21 @@ class PaletteIndex:
         chosen = rng.choice(len(self.X), k, p=w)
         out = np.stack([self._remaining(j, ctx, m, rng) for j in chosen])
         return out + rng.normal(0, jitter, out.shape)
+
+
+class PipelinedBaseline:
+    """Any (ctx, m, k, seed)->(k,m,3) generator wrapped in the *same* postprocessing as the neural models:
+    oversample, gamut + duplicate rejection (chroma-reduction fallback), scorer rerank, greedy diverse top-k.
+    Uses palette.api.Completer's selection logic so the comparison is matched on candidate budget."""
+
+    def __init__(self, raw_fn, scorer, oversample: int = 32, dup_threshold: float = 0.03, diversity_weight: float = 1.0):
+        self.raw_fn, self.scorer, self.oversample = raw_fn, scorer, oversample
+        self.dup_threshold, self.diversity_weight = dup_threshold, diversity_weight
+
+    def complete(self, ctx: np.ndarray, m: int, k: int, seed: int = 0) -> np.ndarray:
+        from palette.api import Completer
+        c = Completer.__new__(Completer)
+        c.oversample, c.max_rounds, c.dup_threshold, c.diversity_weight = self.oversample, 1, self.dup_threshold, self.diversity_weight
+        c.scorer = self.scorer
+        c._raw = lambda ctx_, m_, k_, seed_, guidance=None: self.raw_fn(ctx_, m_, k_, seed_)
+        return c.complete_oklab(ctx, m, k, seed)[0]

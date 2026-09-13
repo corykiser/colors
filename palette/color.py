@@ -189,4 +189,7 @@ class NormStats:
 
     @classmethod
     def from_dict(cls, d: dict) -> "NormStats":
+        if d.get("space") == "srgb":
+            from palette.data import SrgbNorm
+            return SrgbNorm()
         return cls(**{k: float(d[k]) for k in ("L_mean", "L_std", "ab_scale")})

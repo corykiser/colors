@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 from palette.api import Completer
 from palette.baselines.colorwheel import complete as cw_complete
-from palette.baselines.retrieval import PaletteIndex
+from palette.baselines.retrieval import PaletteIndex, PipelinedBaseline
 from palette.color import gamut_map, hex_to_srgb, oklab_to_srgb, srgb_to_hex, clip_srgb
 from palette.data import load_arrays, ROOT
 from palette.eval.probes import PROBES
@@ -47,12 +47,26 @@ def main():
     out = ROOT / a.out; (out / "images").mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(2026)
     train = load_arrays(("kuler", "mturk2014"), "train", norm=None)
-    index = PaletteIndex(train.X.astype(np.float64), train.M)
+    keep = np.isfinite(train.rating) & (train.rating >= 3.0)
+    index = PaletteIndex(train.X[keep].astype(np.float64), train.M[keep])
+    from palette.eval.report import load_scorer
+    scorer = load_scorer()
     methods = {"colorwheel": lambda ctx, m, k, s: np.stack([gamut_map(c)[0] for c in cw_complete(ctx, m, k, s)]),
-               "retrieval": lambda ctx, m, k, s: index.complete(ctx, m, k, s)}
+               "retrieval+pipeline": PipelinedBaseline(lambda ctx, m, k, s: index.complete(ctx, m, k, s), scorer).complete}
     for mp in a.models:
         c = Completer.from_checkpoint(mp)
-        methods[Path(mp).parent.name] = (lambda cc: lambda ctx, m, k, s: cc.complete_oklab(ctx, m, k, s)[0])(c)
+        name = Path(mp).parent.name
+        methods[name] = (lambda cc: lambda ctx, m, k, s: cc.complete_oklab(ctx, m, k, s)[0])(c)
+        # R2 alternative: always complete to five colors, then keep the m best-matching... we keep a random m-subset,
+        # since any preference-based subset choice would smuggle the scorer into the stimulus.
+        def c2f5(ctx, m, k, s, cc=c):
+            need = 5 - len(ctx)
+            if need <= m:
+                return cc.complete_oklab(ctx, m, k, s)[0]
+            full = cc.complete_oklab(ctx, need, k, s)[0]
+            rng = np.random.default_rng(s)
+            return np.stack([f[rng.choice(need, m, replace=False)] for f in full])
+        methods[name + ":complete5-subset"] = c2f5
     items, key = [], {}
     for pi, pr in enumerate(PROBES):
         if not pr["colors"]:

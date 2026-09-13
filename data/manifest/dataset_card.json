@@ -2,23 +2,33 @@
   "seed": 0,
   "dedup": {
     "n_records": 453358,
-    "n_groups": 406315,
+    "n_groups": 406051,
     "exact_duplicate_rows": 26094,
-    "near_candidate_pairs": 54977700,
-    "near_duplicate_pairs": 166717,
+    "near_candidate_pairs": 12308245,
+    "near_duplicate_pairs": 167200,
     "threshold": 0.02,
-    "largest_group": 11096,
-    "rows_in_multi_groups": 66174,
-    "seconds": 300.1
+    "largest_group": 11182,
+    "rows_in_multi_groups": 66508,
+    "seconds": 749.8
+  },
+  "cross_split_near_pairs": {
+    "train-val": 0,
+    "train-test": 0,
+    "val-test": 0
+  },
+  "large_groups_forced_to_train": 100,
+  "rater_separation": {
+    "heldout_users": 114,
+    "ge3_decision_changed": 781
   },
   "per_family": {
     "mturk2014": {
       "records": 13343,
-      "groups": 12855,
+      "groups": 12845,
       "by_split": {
-        "train": 10530,
-        "val": 1439,
-        "test": 1374
+        "train": 10665,
+        "test": 1381,
+        "val": 1297
       },
       "by_size": {
         "5": 13343
@@ -26,11 +36,11 @@
     },
     "mturk2011": {
       "records": 10743,
-      "groups": 10397,
+      "groups": 10392,
       "by_split": {
-        "train": 8461,
-        "val": 1164,
-        "test": 1118
+        "train": 8582,
+        "test": 1129,
+        "val": 1032
       },
       "by_size": {
         "5": 10743
@@ -38,11 +48,11 @@
     },
     "kuler": {
       "records": 44986,
-      "groups": 42692,
+      "groups": 42629,
       "by_split": {
-        "train": 35394,
-        "val": 4974,
-        "test": 4618
+        "train": 35899,
+        "test": 4619,
+        "val": 4468
       },
       "by_size": {
         "5": 44986
@@ -50,11 +60,11 @@
     },
     "colourlovers": {
       "records": 383938,
-      "groups": 363993,
+      "groups": 363805,
       "by_split": {
-        "train": 299161,
-        "val": 47667,
-        "test": 37110
+        "train": 309394,
+        "val": 37327,
+        "test": 37217
       },
       "by_size": {
         "5": 383938
@@ -64,9 +74,9 @@
       "records": 348,
       "groups": 348,
       "by_split": {
-        "train": 280,
-        "val": 34,
-        "test": 34
+        "train": 278,
+        "val": 39,
+        "test": 31
       },
       "by_size": {
         "2": 120,
@@ -76,10 +86,10 @@
     }
   },
   "cross_family_groups": {
-    "kuler + mturk2011 + mturk2014": 9917,
-    "kuler + mturk2014": 2353,
-    "colourlovers + kuler": 589,
-    "colourlovers + kuler + mturk2011 + mturk2014": 302,
+    "kuler + mturk2011 + mturk2014": 9909,
+    "kuler + mturk2014": 2348,
+    "colourlovers + kuler": 599,
+    "colourlovers + kuler + mturk2011 + mturk2014": 305,
     "mturk2011 + mturk2014": 176,
     "colourlovers + kuler + mturk2014": 54,
     "colourlovers + mturk2011 + mturk2014": 2

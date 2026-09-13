@@ -12,20 +12,23 @@ import numpy as np
 import torch
 
 from palette.color import (NormStats, srgb_to_oklab, hex_to_srgb, in_gamut, gamut_map, oklab_to_srgb, srgb_to_hex)
-from palette.diffusion import VPSchedule
+from palette.diffusion import VPSchedule, FlowSchedule
 from palette.eval.metrics import matching_distance
 from palette.eval.report import load_scorer
 from palette.sampling import DiffusionCompleter
 
 
 def repulsive_guidance(strength: float = 0.5, sigma: float = 0.15):
-    """Additive ε correction pushing target colors apart (in normalized space). Zero effect when far apart."""
-    def g(x, target, t):
+    """Additive ε correction pushing each target away from every other *valid* node (targets and context).
+    Zero effect when far apart; only targets move."""
+    def g(x, target, t, valid=None):
         tm = target.float()[..., None]
+        vm = tm if valid is None else valid.float()[..., None]
         d = x[:, :, None] - x[:, None, :]                        # (B,N,N,3)
         r2 = (d**2).sum(-1, keepdim=True)
-        w = torch.exp(-r2 / (2 * sigma**2)) * tm[:, :, None] * tm[:, None, :]
-        force = (w * d / (r2.sqrt() + 1e-6)).sum(2)              # push i away from j
+        w = torch.exp(-r2 / (2 * sigma**2)) * tm[:, :, None] * vm[:, None, :]
+        w = w * (1 - torch.eye(x.shape[1], device=x.device)[None, :, :, None])
+        force = (w * d / (r2.sqrt() + 1e-6)).sum(2)              # push target i away from j
         return -strength * force * tm                            # ε points *toward* noise; subtracting moves x along +force
     return g
 
@@ -37,7 +40,10 @@ def load_model(path: str, device=None):
     model = build_model(ck["config"]["model"]).to(device).eval()
     model.load_state_dict(ck["state_dict"])
     norm = NormStats.from_dict(ck["norm"])
-    sched = VPSchedule(ck["config"]["diffusion"].get("T", 1000), ck["config"]["diffusion"].get("schedule", "cosine")).to(device)
+    space = ck["config"].get("data", {}).get("space", "oklab")
+    dcfg = ck["config"]["diffusion"]
+    sched = (FlowSchedule(dcfg.get("T", 1000)) if dcfg.get("kind") == "flow" else VPSchedule(dcfg.get("T", 1000), dcfg.get("schedule", "cosine"))).to(device)
+    model.space = space
     return model, sched, norm, device
 
 
@@ -46,7 +52,7 @@ class Completer:
     model: object; sched: VPSchedule; norm: NormStats; device: object
     steps: int = 100; method: str = "ddim"; cfg_scale: float | None = None; rating: float | None = None
     oversample: int = 32; max_rounds: int = 3; dup_threshold: float = 0.03; diversity_weight: float = 1.0
-    scorer=None
+    scorer: object = None
 
     def __post_init__(self):
         if self.scorer is None:
@@ -59,7 +65,7 @@ class Completer:
 
     def _raw(self, ctx, m, k, seed, guidance=None):
         dc = DiffusionCompleter(self.model, self.sched, self.norm, self.device, self.steps, self.method,
-                                self.cfg_scale, self.rating, guidance)
+                                self.cfg_scale, self.rating, guidance, space=getattr(self.model, "space", "oklab"))
         return dc.complete(ctx, m, k, seed)
 
     def complete_oklab(self, ctx: np.ndarray, m: int, k: int, seed: int = 0) -> tuple[np.ndarray, dict]:
@@ -68,12 +74,20 @@ class Completer:
         pool, stats = [], {"raw": 0, "in_gamut": 0, "duplicates": 0, "rounds": 0, "mapped_fallback": 0, "guided": 0}
         need = max(k, self.oversample)
 
+        def min_pair_dist(comp):
+            """Min distance over target-target and target-context pairs (fixed-fixed pairs are the user's choice)."""
+            n, m_ = len(ctx), comp.shape[1]
+            d_tt = np.full(len(comp), np.inf)
+            if m_ > 1:
+                i, j = np.triu_indices(m_, 1)
+                d_tt = np.linalg.norm(comp[:, i] - comp[:, j], axis=-1).min(1)
+            d_tc = np.linalg.norm(comp[:, :, None] - ctx[None, None], axis=-1).reshape(len(comp), -1).min(1) if n else np.full(len(comp), np.inf)
+            return np.minimum(d_tt, d_tc)
+
         def accept(comp, into):
             ok_g = in_gamut(comp).all(1)
             stats["raw"] += len(comp); stats["in_gamut"] += int(ok_g.sum())
-            full = np.concatenate([np.broadcast_to(ctx, (len(comp), len(ctx), 3)), comp], 1)
-            i, j = np.triu_indices(full.shape[1], 1)
-            dmin = np.linalg.norm(full[:, i] - full[:, j], axis=-1).min(1) if len(i) else np.full(len(comp), np.inf)
+            dmin = min_pair_dist(comp)
             ok_d = dmin >= self.dup_threshold
             stats["duplicates"] += int((~ok_d & ok_g).sum())
             into.extend(comp[ok_g & ok_d])
@@ -92,10 +106,7 @@ class Completer:
             rej = np.concatenate([r for r in rejected_gamut if len(r)]) if any(len(r) for r in rejected_gamut) else np.zeros((0, m, 3))
             mapped = np.stack([gamut_map(c)[0] for c in rej]) if len(rej) else rej
             if len(mapped):
-                fullm = np.concatenate([np.broadcast_to(ctx, (len(mapped), len(ctx), 3)), mapped], 1)
-                i, j = np.triu_indices(fullm.shape[1], 1)
-                dmin = np.linalg.norm(fullm[:, i] - fullm[:, j], axis=-1).min(1) if len(i) else np.full(len(mapped), np.inf)
-                keep = mapped[dmin >= self.dup_threshold]
+                keep = mapped[min_pair_dist(mapped) >= self.dup_threshold]
                 mapped = keep if len(pool) + len(keep) >= k else mapped   # drop dup-filter only if it would starve k
             stats["mapped_fallback"] = len(mapped); pool.extend(mapped)
         if len(pool) < k:
@@ -123,7 +134,7 @@ class Completer:
         return [list(colors_srgb) + [srgb_to_hex(oklab_to_srgb(c)) for c in comp] for comp in out]
 
 
-def complete(colors_srgb: list[str], m: int, k: int = 4, u=None, checkpoint: str = "experiments/mabs/model_ema.pt", seed: int = 0) -> list[list[str]]:
+def complete(colors_srgb: list[str], m: int, k: int = 4, u=None, checkpoint: str = "experiments/mabs/model_best.pt", seed: int = 0) -> list[list[str]]:
     """Public API (handoff §4.7). u (preference vector) is reserved; None = population model."""
     if u is not None:
         raise NotImplementedError("preference conditioning u is deferred to v2")
