@@ -12,7 +12,7 @@
 
 ## Post-review changes (reports/G5_review_changes.md)
 
-External review (`reports/external_review_codex.md`) items 1–8 implemented: bug fixes, exact-recall dedup and re-split, rater separation, fair pipelined retrieval, ordinal scorer, balanced study package, step sweep, flow-matching and sRGB ablations. Result: through a matched pipeline the generator beats retrieval on quality but not diversity; flow matching at 10 Euler steps is the recommended sampler (97% whole-completion gamut validity, 14 ms/call). Reference runs are now under `experiments/v2/`.
+External review items 1–8 implemented: bug fixes, exact-recall dedup and re-split, rater separation, fair pipelined retrieval, ordinal scorer, balanced study package, step sweep, flow-matching and sRGB ablations. Result: through a matched pipeline the generator beats retrieval on quality but not diversity; flow matching at 10 Euler steps is the recommended sampler (97% whole-completion gamut validity, 14 ms/call). Reference runs are now under `experiments/v2/`.
 
 ## G1 notes
 

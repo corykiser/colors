@@ -46,4 +46,6 @@ data/processed/   parquet in the §2.8 schema (git-ignored)
 experiments/      run outputs (git-ignored)
 ```
 
-Data licensing: the O'Donovan 2011/2014 releases are CC BY-NC-SA 2.5 CA. This project is a noncommercial personal prototype.
+## License
+
+Code: MIT (`LICENSE`). Trained weights and derived data: CC BY-NC-SA 2.5 Canada, inherited from the O'Donovan 2011/2014 releases (`LICENSE-WEIGHTS`). Write-up and live demo: https://corykiser.github.io/colors/

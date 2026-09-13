@@ -1,0 +1,29 @@
+Trained model weights and derived data
+=====================================
+
+Files: web/model.json, docs/demo/model.json, experiments/**/*.pt, data/processed/**, data/splits/**
+
+These were trained on, or derived from, the datasets released with
+
+  Peter O'Donovan, Aseem Agarwala, Aaron Hertzmann.
+  "Color Compatibility From Large Datasets." ACM Transactions on Graphics 30(4), SIGGRAPH 2011.
+  https://www.dgp.toronto.edu/~donovan/color/
+
+  Peter O'Donovan, Aseem Agarwala, Aaron Hertzmann.
+  "Collaborative Filtering of Color Aesthetics." Computational Aesthetics (CAe) 2014.
+  https://www.dgp.toronto.edu/~donovan/cfcolor/
+
+which the authors distribute under the Creative Commons Attribution-NonCommercial-ShareAlike 2.5 Canada
+license (http://creativecommons.org/licenses/by-nc-sa/2.5/ca/).
+
+Accordingly, the weights and derived data in this repository are released under
+CC BY-NC-SA 2.5 Canada. You may use, share and adapt them for noncommercial purposes,
+with attribution to the original authors above and to this repository, and any
+adaptation must carry the same license. Commercial use is not permitted.
+
+The raw datasets themselves are not redistributed here; download them from the project pages above.
+Verified counts, checksums and the license notices as they appeared are recorded in data/manifest/.
+
+The Sanzo Wada palettes (data/processed/wada.parquet, if built) come from Matt DesLauriers' MIT-licensed
+transcription (https://github.com/mattdesl/dictionary-of-colour-combinations); the U.S. copyright status of
+the underlying 1933-34 work is unresolved and they are not included in the trained weights.
